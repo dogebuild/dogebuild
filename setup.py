@@ -9,6 +9,6 @@ setup(
     url='',
     scripts=["doge.py"],
     entry_points={
-        'console_scripts': ['rundoge = doge:da'],
+        'console_scripts': ['rundoge = doge:run_doge'],
     }
 )
