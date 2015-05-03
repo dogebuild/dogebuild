@@ -1,9 +1,14 @@
-from distutils.core import setup
+from setuptools import setup
 
-setup(name='dogebuild',
-      version='0.1',
-      description='Dogebuild core ',
-      author='Kirill Sulim',
-      author_email='kirillsulim@gmail.com',
-      url='',
-      packages=["dogebuild", "dogebuild.core"])
+setup(
+    name='doge-script',
+    version='0.1',
+    description='Bla',
+    author='Me',
+    author_email='',
+    url='',
+    scripts=["doge.py"],
+    entry_points={
+        'console_scripts': ['rundoge = doge:da'],
+    }
+)
