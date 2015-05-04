@@ -1,14 +1,14 @@
 from setuptools import setup
 
 setup(
-    name='doge-script',
+    name='doge',
     version='0.1',
-    description='Bla',
-    author='Me',
-    author_email='',
-    url='',
-    scripts=["doge.py"],
+    description='Some description, IDK, wow!',
+    author='Kirill Sulim',
+    author_email='kirillsulim@gmail.com',
+    url='https://github.com/dogebuild/dogebuild',
+    scripts=["doge_script.py"],
     entry_points={
-        'console_scripts': ['rundoge = doge:run_doge'],
+        'console_scripts': ['doge = doge_script:run_doge'],
     }
 )
