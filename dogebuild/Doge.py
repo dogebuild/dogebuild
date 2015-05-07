@@ -7,16 +7,17 @@ from dogebuild.plugin.interfaces import *
 class Doge:
     def __init__(self):
         self.plugins = []
-        self.contrib_name = 'dogebuildcontrib'
+        self.contrib_name = 'dogebuild'
         self.pip = PipAdapter()
 
     def use_plugin(self, plugin_name):
-        plugin_full_name = self.contrib_name + '.' + plugin_name
+        plugin_full_name = self.contrib_name + '-' + plugin_name
+        plugin_package = self.contrib_name + '_' + plugin_name
 
         if not self.check_plugin_installed(plugin_full_name):
             self.pip.install(plugin_full_name)  # ???
 
-        file, path, desc = self.find_dotted_module(plugin_full_name + '.loader')
+        file, path, desc = self.find_dotted_module(plugin_package + '.loader')
         loader_file = imp.load_module('loader', file, path, desc)
 
         plugin = loader_file.get()
