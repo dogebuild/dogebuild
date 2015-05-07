@@ -1,6 +1,7 @@
 import imp
 from dogebuild.adapters.pip import PipAdapter
 from dogebuild.loaders.plugin_loader import PluginLoader
+from dogebuild.plugin.interfaces import *
 
 
 class Doge:
@@ -15,32 +16,38 @@ class Doge:
         if not self.check_plugin_installed(plugin_full_name):
             self.pip.install(plugin_full_name)  # ???
 
-        file, path, description = imp.find_module(self.contrib_name)
-        imp.load_module(self.contrib_name, file, path, description)
+        file, path, desc = self.find_dotted_module(plugin_full_name + '.loader')
+        loader_file = imp.load_module('loader', file, path, desc)
 
-        file, path, description = imp.find_module(plugin_full_name)
-        plugin_module = imp.load_module(plugin_full_name, file, path, description)
-
-        plugin = plugin_module
-
-
-
-
-
+        plugin = loader_file.get()
         self.plugins.append(plugin)
         return plugin
 
     def build(self):
+        tasks = []
         for p in self.plugins:
-            p.build()
+            tasks.extend(p.get_active_tasks())
 
-    def check_plugin_installed(self, plugin_name):
+        for t in tasks:
+            t.run()
+
+    def find_dotted_module(self, module_name, path=None):
+        for x in module_name.split('.'):
+            print('1', path, x)
+            if path is not None:
+                path = [path]
+            file, path, description = imp.find_module(x, path)
+            print('2', file, path, description)
+        return file, path, description
+
+    def check_plugin_installed(self, plugin_full_name):
         try:
-            plugin_info = imp.find_module(plugin_name)
+            self.find_dotted_module(plugin_full_name)
             return True
         except ImportError:
             return False
 
-if __name__ == 'main':
-    Doge().use_plugin('pip')
+
+
+
 

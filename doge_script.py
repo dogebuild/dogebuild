@@ -5,17 +5,20 @@ import subprocess
 import site
 
 PREDEF_FILE = """#This is auto generated file
-import pip
+from dogebuild.doge import Doge
 
 
-pip.main(['install', 'salve', '--require-venv'])
-pip.main(['-V'])
+d = Doge()
+h = d.use_plugin('hello')
+h.message = 'Not def'
+d.build()
 """
 
 HELLO_MESS = "Hi! It's dogebuild! Call me with \"init\" to create file"
 
 
 def run_doge():
+    print(__file__)
     print("Doge greets you!")
     current_directory = os.getcwd()
     dogefile = os.path.join(current_directory, 'dogefile.py')
@@ -26,9 +29,9 @@ def run_doge():
         if os.path.exists(dogefile) and os.path.isfile(dogefile):
             print("dogefile found. Wow!")
 
-            if not os.path.exists(venv_dir):
-                init_venv(venv_dir)
-            activate_venv(venv_dir)
+            #if not os.path.exists(venv_dir):
+            #    init_venv(venv_dir)
+            #activate_venv(venv_dir)
             print(sys.path)
             exec(open(dogefile).read())
 
@@ -67,11 +70,6 @@ def activate_venv(venv_dir):
     print("venv activated!!!")
 
 
-
-
-
-if __name__ == "__main__":
-    run_doge()
 
 
 
