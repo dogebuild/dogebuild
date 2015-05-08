@@ -34,11 +34,9 @@ class Doge:
 
     def find_dotted_module(self, module_name, path=None):
         for x in module_name.split('.'):
-            print('1', path, x)
             if path is not None:
                 path = [path]
             file, path, description = imp.find_module(x, path)
-            print('2', file, path, description)
         return file, path, description
 
     def check_plugin_installed(self, plugin_full_name):

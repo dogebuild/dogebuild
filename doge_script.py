@@ -2,7 +2,10 @@ import sys
 import os
 import subprocess
 
-import site
+from dogebuild.adapters.dogefile import DogefileAdapter
+from dogebuild.adapters.virtualenv import VirtualenvAdapter
+from dogebuild.adapters.pip import PipAdapter
+
 
 PREDEF_FILE = """#This is auto generated file
 from dogebuild.doge import Doge
@@ -18,62 +21,39 @@ HELLO_MESS = "Hi! It's dogebuild! Call me with \"init\" to create file"
 
 
 def run_doge():
-    print(__file__)
-    print("Doge greets you!")
     current_directory = os.getcwd()
-    dogefile = os.path.join(current_directory, 'dogefile.py')
-    venv_dir = os.path.join(current_directory, '.venv')
+    pip = PipAdapter()
+    venv = VirtualenvAdapter(current_directory)
+    dogefile = DogefileAdapter(current_directory)
 
     if len(sys.argv) == 1:
+        # Called with no arguments
         print(HELLO_MESS)
-        if os.path.exists(dogefile) and os.path.isfile(dogefile):
-            print("dogefile found. Wow!")
-
-            #if not os.path.exists(venv_dir):
-            #    init_venv(venv_dir)
-            #activate_venv(venv_dir)
-            print(sys.path)
-            exec(open(dogefile).read())
+        if dogefile.exist():
+            print("dogefile.py found. Wow!")
+            if venv.enabled():
+                venv.activate()
+            dogefile.run()
 
     elif len(sys.argv) == 2:
+        # Called with one argument
         if sys.argv[1] == 'init':
-            if os.path.exists(dogefile) and not os.path.isfile(dogefile):
-                print("doggefile.py is not file.")
-
-            elif os.path.exists(dogefile) and os.path.isfile(dogefile):
-                rewrite = input("File exists. Print \"yes\" if you want to rewrite file. ")
-                if rewrite:
-                    init_file(dogefile)
-                    print("File was rewrited.")
-
+            if dogefile.exist():
+                answer = input('Doge file exists. Print "yes" to rewrite.\n')
+                if answer == 'yes':
+                    dogefile.create()
             else:
-                init_file(dogefile)
+                dogefile.create()
 
 
-def init_file(file_name):
-    file = open(file_name, 'w')
-    file.seek(0)
-    file.truncate()
-    file.write(PREDEF_FILE)
-    file.close()
-
-
-def init_venv(venv_dir):
-    os.makedirs(venv_dir)
-    subprocess.call(["virtualenv", venv_dir, '--no-site-packages', ])
-    print("Venv created")
-
-
-def activate_venv(venv_dir):
-    activate_file = os.path.join(venv_dir, 'Scripts', 'activate_this.py')
-    exec(open(activate_file).read(), dict(__file__=activate_file))
-    print("venv activated!!!")
-
-
-
-
-
-
-
-
+def process_arguments(arg_array):
+    args = {}
+    if len(arg_array) == 1:
+        args['no'] = True
+    elif len(arg_array) >= 2:
+        if sys.argv[1] == 'init':
+            args['init'] = True
+    else:
+        pass
+    return args
 

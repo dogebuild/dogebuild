@@ -15,5 +15,6 @@ setup(
     scripts=['doge_script.py'],
     entry_points={
         'console_scripts': ['doge = doge_script:run_doge'],
-    }
+    },
+    test_suite='tests',
 )
