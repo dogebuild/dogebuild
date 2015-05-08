@@ -8,7 +8,7 @@ class VirtualenvAdapter():
         self.venv_dir = os.path.join(dir, '.venv')
 
     def enabled(self):
-        os.path.exists(self.venv_dir) and os.path.isdir(self.venv_dir)
+        return os.path.exists(self.venv_dir) and os.path.isdir(self.venv_dir)
 
     def create(self):
         if os.path.exists(self.venv_dir):

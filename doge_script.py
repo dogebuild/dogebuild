@@ -33,6 +33,7 @@ def run_doge():
         if dogefile.exist():
             print("dogefile.py found. Wow!")
             if venv.enabled():
+                print(".venv found")
                 venv.activate()
             dogefile.run()
 

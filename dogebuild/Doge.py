@@ -14,7 +14,7 @@ class Doge:
         plugin_full_name = self.contrib_name + '-' + plugin_name
         plugin_package = self.contrib_name + '_' + plugin_name
 
-        if not self.check_plugin_installed(plugin_full_name):
+        if not self.check_plugin_installed(plugin_package):
             self.pip.install(plugin_full_name)  # ???
 
         file, path, desc = self.find_dotted_module(plugin_package + '.loader')
