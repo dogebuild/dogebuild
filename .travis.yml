@@ -2,14 +2,13 @@ language: python
 python:
 - '3.3'
 - '3.4'
-
 install: python setup.py install
 script: python setup.py test
-
 deploy:
   provider: pypi
   user: kirillsulim
   password:
-    secure: hp81rGlphHumEVJcWE6OGflssOxkB15K8u/NkUQR0YDVIZron9/0iH0Bvu3GWBYBdi92/hCkAiVnSjTDlK6FoLZQEZ19pk890TnjcHAjl5rMjwj0OutktrvL1lCuoBO31MzU9AqCRTZXZyBCaqOO4EJYoiTzRFsi94tRY3/d6EWwGpX5EzxDV+RjYpzc32OC7PlrgRT9O96TS6KdCMBkMvJZic4qmITqEMP3ezVZLICD3LlL46dapKMq7tnXvmxj8V8A9ccCccYwr/5C2NNstbU5aHHLn4UOh/p6ujrzi7Xyr4oJE6X6X0vnw0bdiaPlrdbhFxRYn0FmL/AaviJffn9m+BSop+uLVdh1WqKC9iZrNbQ+1S8Q4RhzBYnxn585F2NtMWMuxYcv+gze6f/+Qrqg7vMDocx9oyIVPv6oIbAfNblrVJr7IZz8I+nVe1K8bahNU3Ho0VwXalMkgPkuma7a1HqPp0oEqFIvJ+bQFzvEb/VVLG1D6STE28PbCGL3b/9OE3Mq+EBeZr2LtR9HCJM8nzI0QCqFLZLH3wYaQp8l8U3CMWRri5p7Yfhd+9SNHcbIKYa4ThKu12tYjqYBK5EXTAw5RsmV8AsefsvsKbt8h6mVRkgCfV6RzumnimQVsqbDoQXzUzT8v/USw//RFEfADMRJddT/vyRX+FFkjHU=
+    secure: KjcfBdWdnXVYdhzLgw6U9Uyk+36ZtqGY8lI++PueQR/A+7UUD4bxcn4l8Lf4Qmdgfakhxuo3O6nDfXgJj6q7sJ9XBMY4PYKzzF3J8I/008K0/V8Uj5KRCXtw4BPt2T7Wm0qmeKEHAV2CTTwa2G4Ztj7duL/yic3q0xXU1hk1apLmyc1mNk2vzruqEdXTj8sids0ffhMEUvaZtoucim/aFD8iZ7qKDEp5Aneqnxz/gQLGmg63RulS/BXc0lmb+vDdHcMDzIjbtac6y4y/hFEt/RN9ZlStqtONrg840WYTrRnLvAELetccZaScIEbPBpRUht5NBHEDrkTAXgiF5LaMzxF8pRZX+3tDIfisYR3xirmCkwa6Yt71R2RGpHRlti+GMEhxUxpOEsCoByfnatBlngARl5DNJviYUIxnahavBWqQ/OSCawgZw/Jq0IHQE2oLjAkb77q/kZxNDP8Wc/2Ggkr+Tcltiry+ue6BBL+dg2jx0+aeg58CqgHMc47T/QNF1WGjG+/RMYLTyaw2oy+WhPVBSEiKr02KN+JOgB+UX/hQ9v8oIAUURGnaBIWlfnD71hFUHUN3wgTVNvfmMdkCUqrmlGCqZnPVO3eAKmaUoleVSjjeWXnxn50Zr+g490fyNNbHezuo0wcCzZzJajCM/S58BW04oonxZwpdM2yH5QU=
   on:
     tags: true
+    repo: dogebuild/dogebuild
