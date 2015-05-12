@@ -5,6 +5,7 @@ import subprocess
 from dogebuild.adapters.dogefile import DogefileAdapter
 from dogebuild.adapters.virtualenv import VirtualenvAdapter
 from dogebuild.adapters.pip import PipAdapter
+from dogebuild import __version__ as version
 
 
 PREDEF_FILE = """#This is auto generated file
@@ -17,7 +18,7 @@ h.message = 'Not def'
 d.build()
 """
 
-HELLO_MESS = "Hi! It's dogebuild! Call me with \"init\" to create file"
+HELLO_MESS = "Dogebuild " + version + " "
 
 
 def run_doge():

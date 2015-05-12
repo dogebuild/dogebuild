@@ -17,7 +17,7 @@ class VirtualenvAdapter():
         subprocess.call([
             "virtualenv",
             self.venv_dir,
-            '--no-site-packages',
+            '--system-site-packages',
             ])
         print('.venv created')
 
