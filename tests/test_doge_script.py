@@ -1,6 +1,6 @@
 import unittest
 
-from doge_script import process_arguments as parse
+from scripts.doge_script import process_arguments as parse
 
 
 class ArgsParsing(unittest.TestCase):
