@@ -1,7 +1,5 @@
 import imp
-from dogebuild.adapters.pip import PipAdapter
-from dogebuild.loaders.plugin_loader import PluginLoader
-from dogebuild.plugin.interfaces import *
+from adapters.pip import PipAdapter
 
 
 class Doge:

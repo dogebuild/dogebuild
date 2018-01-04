@@ -11,8 +11,11 @@ setup(
     packages=find_packages(include=[
         'dogebuild*',
     ]),
+    package_dir={
+        '': 'src/main',
+    },
     scripts=[
-        'scripts/doge_script.py',
+        'src/scripts/doge_script.py',
     ],
     entry_points={
         'console_scripts': [
@@ -31,8 +34,6 @@ setup(
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
         'Topic :: Software Development',
     ],
     keywords='dogebuild builder',

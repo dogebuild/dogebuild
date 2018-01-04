@@ -3,9 +3,9 @@ import os
 
 
 class VirtualenvAdapter():
-    def __init__(self, dir):
+    def __init__(self, dir, venv_dir_name='.venv'):
         self.dir = dir
-        self.venv_dir = os.path.join(dir, '.venv')
+        self.venv_dir = os.path.join(dir, venv_dir_name)
 
     def enabled(self):
         return os.path.exists(self.venv_dir) and os.path.isdir(self.venv_dir)
@@ -18,15 +18,11 @@ class VirtualenvAdapter():
             "virtualenv",
             self.venv_dir,
             '--system-site-packages',
-            ])
-        print('.venv created')
+        ])
+        print('Virtualenv created in "%s"' % self.venv_dir)
 
     def activate(self):
         activate_file = os.path.join(self.venv_dir, 'Scripts', 'activate_this.py')
-        try:
-            file = open(activate_file)
+        with open(activate_file) as file:
             exec(file.read(), dict(__file__=activate_file))
-            print(".venv activated!!!")
-        finally:
-            file.close()
-
+            print('Virtualenv activated from "%s"' % self.venv_dir)
