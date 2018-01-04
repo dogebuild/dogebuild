@@ -22,7 +22,7 @@ setup(
             'doge = doge_script:run_doge',
         ],
     },
-    test_suite='tests',
+    test_suite='src.tests',
     install_requires=[
         'pip',
         'virtualenv',
