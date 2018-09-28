@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='dogebuild',
-    version='0.1.0.dev3',
+    version='0.0.1',
     description='Builder with plugin system',
     author='Kirill Sulim',
     author_email='kirillsulim@gmail.com',
@@ -15,11 +15,11 @@ setup(
         '': 'src/main',
     },
     scripts=[
-        'src/scripts/doge_script.py',
+        'src/scripts/doge_runner.py',
     ],
     entry_points={
         'console_scripts': [
-            'doge = doge_script:run_doge',
+            'doge = doge_runner:main',
         ],
     },
     test_suite='src.tests',
