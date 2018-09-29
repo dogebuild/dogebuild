@@ -43,17 +43,22 @@ def dependency_tree() -> int:
     return 0
 
 
-def _get_dependencies(file: str) -> List[Dependency]:
+def _get_dependencies(file: str, parents: List[str] = None) -> List[Dependency]:
+    if not parents:
+        parents = []
+
     dependencies = load_doge_file(file)
     for d in dependencies:
         id, version = d.get_id()
+        if id in parents:
+            raise Exception('Circular dependency')
         use_version = _resolve_version_(id, version)
         if version != use_version:
             d.original_version = d.version
             d.version = use_version
         print('Acquiring {} ...'.format(d))
         d.acquire_dependency()
-        d.dependencies = _get_dependencies(path.join(d.get_doge_file_folder(), DOGE_FILE))
+        d.dependencies = _get_dependencies(path.join(d.get_doge_file_folder(), DOGE_FILE), parents + [id])
     return dependencies
 
 
