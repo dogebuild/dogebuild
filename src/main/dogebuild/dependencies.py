@@ -3,8 +3,22 @@ import os
 from os import path
 from shutil import rmtree
 
+from typing import Tuple, Union
 
-class GitDependency:
+
+class Dependency:
+    def get_id(self) -> Tuple[str, Union[str, None]]:
+        raise NotImplementedError
+
+    def __str__(self):
+        id, version = self.get_id()
+        if not version:
+            return id
+        else:
+            return '{} ({})'.format(id, version)
+
+
+class GitDependency(Dependency):
     GIT_REPO_FOLDER = path.expanduser(path.join('~', '.doge', 'repo', 'git'))
 
     def __init__(self, url, commit=None, tag=None, branch='master'):
@@ -14,6 +28,7 @@ class GitDependency:
         self.commit = commit
         self.tag = tag
         self.branch = branch
+        self.dependencies = []
 
     def acquire_dependency(self):
         self._assert_repo_folder_exists()
@@ -49,16 +64,26 @@ class GitDependency:
         else:
             raise NotImplementedError
 
-    def __str__(self):
-        return self.url + " - " + self.branch
+    def get_id(self) -> Tuple[str, Union[str, None]]:
+        if self.tag:
+            version = 'tag:' + self.tag
+        elif self.branch:
+            version = 'branch:' + self.branch
+        elif self.commit:
+            raise NotImplementedError
+        else:
+            raise NotImplementedError
+
+        return self.url, version
 
     def _assert_repo_folder_exists(self):
         os.makedirs(GitDependency.GIT_REPO_FOLDER, exist_ok=True)
 
 
-class FolderDependency:
+class FolderDependency(Dependency):
     def __init__(self, folder):
         self.folder = folder
+        self.dependencies = []
 
     def acquire_dependency(self):
         pass
@@ -66,8 +91,8 @@ class FolderDependency:
     def get_doge_file_folder(self):
         return self.folder
 
-    def __str__(self):
-        return self.folder
+    def get_id(self) -> Tuple[str, Union[str, None]]:
+        return self.folder, None
 
 
 def folder(folder: str) -> FolderDependency:

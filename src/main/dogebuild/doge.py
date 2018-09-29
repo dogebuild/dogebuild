@@ -2,6 +2,10 @@ import argparse
 import sys
 from os import path
 
+from typing import List
+
+from  .dependencies import Dependency
+
 
 DOGE_FILE = 'dogefile.py'
 
@@ -34,19 +38,27 @@ def get_current_module():
 
 
 def dependency_tree() -> int:
-    _recursive_file_process(DOGE_FILE)
+    deps = _get_dependencies(DOGE_FILE)
+    _print_dependencies(deps)
     return 0
 
 
-def _recursive_file_process(file):
+def _get_dependencies(file: str) -> List[Dependency]:
     dependencies = load_doge_file(file)
     for d in dependencies:
-        print(d)
+        print('Acquiring {} ...'.format(d))
         d.acquire_dependency()
-        _recursive_file_process(path.join(d.get_doge_file_folder(), DOGE_FILE))
+        d.dependencies = _get_dependencies(path.join(d.get_doge_file_folder(), DOGE_FILE))
+    return dependencies
 
 
-def load_doge_file(filename=DOGE_FILE):
+def _print_dependencies(dependencies: List[Dependency], inner_level: int=0):
+    for d in dependencies:
+        print(' +' * inner_level + str(d))
+        _print_dependencies(d.dependencies, inner_level=inner_level + 1)
+
+
+def load_doge_file(filename):
     with open(filename) as f:
         code = compile(f.read(), DOGE_FILE, 'exec')
         scope = {}
