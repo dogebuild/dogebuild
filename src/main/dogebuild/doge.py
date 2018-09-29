@@ -2,9 +2,9 @@ import argparse
 import sys
 from os import path
 
-from typing import List
+from typing import List, Union, Tuple
 
-from  .dependencies import Dependency
+from .dependencies import Dependency
 
 
 DOGE_FILE = 'dogefile.py'
@@ -46,6 +46,11 @@ def dependency_tree() -> int:
 def _get_dependencies(file: str) -> List[Dependency]:
     dependencies = load_doge_file(file)
     for d in dependencies:
+        id, version = d.get_id()
+        use_version = _resolve_version_(id, version)
+        if version != use_version:
+            d.original_version = d.version
+            d.version = use_version
         print('Acquiring {} ...'.format(d))
         d.acquire_dependency()
         d.dependencies = _get_dependencies(path.join(d.get_doge_file_folder(), DOGE_FILE))
@@ -54,11 +59,30 @@ def _get_dependencies(file: str) -> List[Dependency]:
 
 def _print_dependencies(dependencies: List[Dependency], inner_level: int=0):
     for d in dependencies:
-        print(' +' * inner_level + str(d))
+        if d.original_version:
+            print(' ' * (2 * inner_level - 1) + '+' + str(d) + ' conflict resolved for {}'.format(d.original_version))
+        else:
+            print(' ' * (2 * inner_level - 1) + '+' + str(d))
         _print_dependencies(d.dependencies, inner_level=inner_level + 1)
 
 
-def load_doge_file(filename):
+VERSIONS = {}
+
+
+def _resolve_version_(id: str, version: Union[str, None]) -> Union[str, None]:
+    if not version:
+        return None
+
+    # simple conflict resolving strategy
+    saved_version = VERSIONS.get(id)
+    if not saved_version:
+        VERSIONS[id] = version
+        return version
+    else:
+        return saved_version
+
+
+def load_doge_file(filename) -> List[Dependency]:
     with open(filename) as f:
         code = compile(f.read(), DOGE_FILE, 'exec')
         scope = {}
