@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 class Plugin(ABC):
     """\
-    Inherit yours plugin classes from this class
+    Inherit yours plugin_old classes from this class
     """
     @abstractmethod
     def get_active_tasks(self):

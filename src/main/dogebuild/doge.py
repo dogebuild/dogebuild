@@ -1,15 +1,11 @@
 import argparse
 import sys
-from os import path
+from typing import List
 
-from typing import List, Union, Tuple
-
+from .common import DOGE_FILE
 from .dependencies import Dependency
-
-
-DOGE_FILE = 'dogefile.py'
-
-DEPENDENCIES_VAR = 'DEPENDENCIES'
+from dogebuild.dependencies_functions import resolve_dependency_tree
+from .dogefile_loader import load_doge_file
 
 
 def run():
@@ -19,8 +15,8 @@ def run():
 
     main_args = main_parser.parse_args()
 
-    func_name = get_function_name(main_args.command[0])
-    func = getattr(get_current_module(), func_name, None)
+    func_name = _get_function_name(main_args.command[0])
+    func = getattr(_get_current_module(), func_name, None)
     if not callable(func):
         print('Unknown command {}'.format(main_args.command))
         print(main_parser.format_help())
@@ -28,38 +24,20 @@ def run():
     exit(func(*main_args.options))
 
 
-def get_function_name(name: str) -> str:
+def _get_function_name(name: str) -> str:
     return name.replace('-', '_')
 
 
-def get_current_module():
+def _get_current_module():
     module_name = globals()['__name__']
     return sys.modules[module_name]
 
 
 def dependency_tree() -> int:
-    deps = _get_dependencies(DOGE_FILE)
+    deps, _ = load_doge_file(DOGE_FILE)
+    deps = resolve_dependency_tree(deps)
     _print_dependencies(deps)
     return 0
-
-
-def _get_dependencies(file: str, parents: List[str] = None) -> List[Dependency]:
-    if not parents:
-        parents = []
-
-    dependencies = load_doge_file(file)
-    for d in dependencies:
-        id, version = d.get_id()
-        if id in parents:
-            raise Exception('Circular dependency')
-        use_version = _resolve_version_(id, version)
-        if version != use_version:
-            d.original_version = d.version
-            d.version = use_version
-        print('Acquiring {} ...'.format(d))
-        d.acquire_dependency()
-        d.dependencies = _get_dependencies(path.join(d.get_doge_file_folder(), DOGE_FILE), parents + [id])
-    return dependencies
 
 
 def _print_dependencies(dependencies: List[Dependency], inner_level: int=0):
@@ -71,29 +49,3 @@ def _print_dependencies(dependencies: List[Dependency], inner_level: int=0):
         _print_dependencies(d.dependencies, inner_level=inner_level + 1)
 
 
-VERSIONS = {}
-
-
-def _resolve_version_(id: str, version: Union[str, None]) -> Union[str, None]:
-    if not version:
-        return None
-
-    # simple conflict resolving strategy
-    saved_version = VERSIONS.get(id)
-    if not saved_version:
-        VERSIONS[id] = version
-        return version
-    else:
-        return saved_version
-
-
-def load_doge_file(filename) -> List[Dependency]:
-    with open(filename) as f:
-        code = compile(f.read(), DOGE_FILE, 'exec')
-        scope = {}
-        exec(code, scope)
-
-        dependencies = scope.get(DEPENDENCIES_VAR)
-        if not dependencies:
-            dependencies = []
-        return dependencies

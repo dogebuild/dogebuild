@@ -3,11 +3,11 @@ import os
 from os import path
 from shutil import rmtree
 
-from typing import Tuple, Union
+from typing import Tuple, Optional
 
 
 class Dependency:
-    def get_id(self) -> Tuple[str, Union[str, None]]:
+    def get_id(self) -> Tuple[str, Optional[str]]:
         raise NotImplementedError
 
     def __str__(self):
@@ -69,7 +69,7 @@ class GitDependency(Dependency):
         else:
             raise NotImplementedError
 
-    def get_id(self) -> Tuple[str, Union[str, None]]:
+    def get_id(self) -> Tuple[str, Optional[str]]:
         return self.url, self.version
 
     def _assert_repo_folder_exists(self):
@@ -89,7 +89,7 @@ class FolderDependency(Dependency):
     def get_doge_file_folder(self):
         return self.folder
 
-    def get_id(self) -> Tuple[str, Union[str, None]]:
+    def get_id(self) -> Tuple[str, Optional[str]]:
         return self.folder, None
 
 
