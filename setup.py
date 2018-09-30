@@ -26,6 +26,7 @@ setup(
     install_requires=[
         'pip',
         'virtualenv',
+        'toposort=1.5',
     ],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',

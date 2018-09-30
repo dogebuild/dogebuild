@@ -49,14 +49,13 @@ def _print_dependencies(dependencies: List[Dependency], inner_level: int=0):
         _print_dependencies(d.dependencies, inner_level=inner_level + 1)
 
 
-def run_plugin(task) -> int:
+def run_plugin(*task) -> int:
     deps, plugins = load_doge_file(DOGE_FILE)
     for p in plugins:
         print('clz:', p.get_name())
-        tsk = p.tasks.get(task)
-        if tsk:
-            print('Fake call of', p.dag_context.deps[tsk.__name__])
-            code = tsk()
+        tsks = p.get_tasks(task)
+        for tsk in tsks:
+            code = tsk(p)
             if code != 0:
                 print('Task failed with', code)
                 return code
