@@ -9,11 +9,8 @@ setup(
     license='MIT',
     url='https://github.com/dogebuild/dogebuild',
     packages=find_packages(include=[
-        'dogebuild*',
+        'dogebuild',
     ]),
-    package_dir={
-        '': 'dogebuild',
-    },
     scripts=[
         'scripts/doge_runner.py',
     ],
