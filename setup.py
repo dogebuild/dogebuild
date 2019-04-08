@@ -12,17 +12,17 @@ setup(
         'dogebuild*',
     ]),
     package_dir={
-        '': 'src/main',
+        '': 'dogebuild',
     },
     scripts=[
-        'src/scripts/doge_runner.py',
+        'scripts/doge_runner.py',
     ],
     entry_points={
         'console_scripts': [
             'doge = doge_runner:main',
         ],
     },
-    test_suite='src.tests',
+    test_suite='tests',
     install_requires=[
         'pip',
         'virtualenv',

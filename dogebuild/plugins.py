@@ -10,7 +10,7 @@ class DagContext:
         self.tasks = {}
         self.edges = {}
 
-    def task(self, name: str=None, depends: List[str]=None):
+    def task(self, name: str = None, depends: List[str] = None):
         if not depends:
             depends = []
 
