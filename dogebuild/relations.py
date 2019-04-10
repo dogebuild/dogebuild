@@ -1,4 +1,4 @@
-from typing import Dict, List, Callable
+from typing import Dict, List, Callable, Tuple
 
 from collections import OrderedDict
 from toposort import toposort_flatten
@@ -44,13 +44,26 @@ class TaskRelationManager:
 
     def add_task(self, task_name: str, task: Callable):
         self._tasks[task_name] = task
+        self._relation_manager.add_dependency(task_name, [])
 
     def add_dependency(self, dependant: str, dependencies: List[str]):
         self._relation_manager.add_dependency(dependant, dependencies)
 
-    def get_tasks(self, task_names: List[str]) -> List[Callable]:
+    def get_tasks(self, task_names: List[str]) -> List[Tuple[str, Callable]]:
         task_names = self._relation_manager.get_dependencies_recursive(task_names)
-        return list(map(lambda name: self._tasks[name], task_names))
+        return list(map(lambda name: (name, self._tasks[name]), task_names))
+
+    def verify(self):
+        known_task_names = set()
+        for key in self._relation_manager._edges.keys():
+            known_task_names.add(key)
+            for dep in self._relation_manager._edges[key]:
+                known_task_names.add(dep)
+
+        for task_name in known_task_names:
+            if task_name not in self._tasks.keys():
+                raise Exception("Inconsistent task graph: unknown name '{}'".format(task_name))
+
 
 
 TASK_RELATION_MANAGER = TaskRelationManager()
@@ -64,7 +77,7 @@ def task(name: str = None, depends: List[str] = None, phase: str = None):
         task_name = name
         if not task_name:
             task_name = task_callable.__name__
-        task_name = _sanitize_name(task_name)
+        task_name = 'dogefile:' + _sanitize_name(task_name)
 
         TASK_RELATION_MANAGER.add_task(task_name, task_callable)
         TASK_RELATION_MANAGER.add_dependency(task_name, depends)
@@ -81,17 +94,26 @@ def _sanitize_name(name: str):
     return name.replace('_', '-')
 
 
-# Here are phases
-@task('compile')
-def phase_compile():
+def skip():
     pass
 
 
-@task('test', depends=['compile'])
-def phase_test():
-    pass
+# Phases list
 
+# Clean cycle
 
-@task('run', depends=['test'])
-def phase_run():
-    pass
+TASK_RELATION_MANAGER.add_task('clean', skip)
+
+# Compile cycle
+
+TASK_RELATION_MANAGER.add_task('compile', skip)
+
+TASK_RELATION_MANAGER.add_task('test', skip)
+TASK_RELATION_MANAGER.add_dependency('test', ['compile'])
+
+TASK_RELATION_MANAGER.add_task('run', skip)
+TASK_RELATION_MANAGER.add_dependency('run', ['test'])
+
+# Documentation cycle
+
+TASK_RELATION_MANAGER.add_task('docs', skip)

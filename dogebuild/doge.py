@@ -2,10 +2,12 @@ import argparse
 import sys
 from typing import List
 
-from .common import DOGE_FILE
-from .dependencies import Dependency
+from dogebuild.common import DOGE_FILE
+from dogebuild.dependencies import Dependency
 from dogebuild.dependencies_functions import resolve_dependency_tree
-from .dogefile_loader import load_doge_file
+from dogebuild.dogefile_loader import load_doge_file
+
+from dogebuild.relations import TASK_RELATION_MANAGER
 
 
 def run() -> None:
@@ -51,14 +53,16 @@ def _print_dependencies(dependencies: List[Dependency], inner_level: int=0):
 
 def run_plugin(*task) -> int:
     deps, plugins = load_doge_file(DOGE_FILE)
-    for p in plugins:
-        print('clz:', p.get_name())
-        tsks = p.get_tasks(task)
-        for tsk in tsks:
-            code = tsk(p)
-            if code != 0:
-                print('Task failed with', code)
-                return code
+    z = TASK_RELATION_MANAGER
+
+    z.verify()
+    tsks = z.get_tasks(task)
+
+    for t in tsks:
+        exit_code = t[1]()
+        if exit_code:
+            return exit_code
+
     return 0
 
 

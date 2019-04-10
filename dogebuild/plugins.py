@@ -2,61 +2,32 @@ from typing import Dict, Callable, List
 from collections import OrderedDict
 from toposort import toposort_flatten
 
-
-class DagContext:
-    DUMMY = 1
-
-    def __init__(self):
-        self.tasks = {}
-        self.edges = {}
-
-    def task(self, name: str = None, depends: List[str] = None):
-        if not depends:
-            depends = []
-
-        def decorator(func):
-            task_name = name
-            if not task_name:
-                task_name = func.__name__
-            task_name = self._sanitize_name(task_name)
-            self.tasks[task_name] = func
-            self.edges[task_name] = set(depends)
-            return func
-
-        return decorator
-
-    def get_tasks(self, tasks: List[str]) -> List[Callable]:
-        dc = OrderedDict()
-
-        def recursive_append(target: Dict, source: dict, key):
-            target[key] = source[key]
-            for x in target[key]:
-                if not x in target.keys():
-                    recursive_append(target, source, x)
-
-        for task in tasks:
-            active_tasks = {}
-            recursive_append(active_tasks, self.edges, task)
-            task_required = toposort_flatten(active_tasks)
-            for x in task_required:
-                dc[x] = self.DUMMY
-
-        return list(map(lambda x: self.tasks[x], dc.keys()))
-
-    @staticmethod
-    def _sanitize_name(name: str):
-        return name.replace('_', '-')
+from dogebuild.relations import TASK_RELATION_MANAGER
 
 
 class DogePlugin:
     NAME = 'This is abstract doge plugin so this variable should never be used'
+    _TASK_RELATION_MANAGER = TASK_RELATION_MANAGER
 
     @classmethod
     def get_name(cls):
         return cls.NAME
 
-    def __init__(self, dag_context: DagContext):
-        self.dag_context = dag_context
+    def __init__(self, **kwargs):
+        pass
 
-    def get_tasks(self, tasks: List[str]):
-        return self.dag_context.get_tasks(tasks)
+    def add_task(self, task_name: str, task: Callable, phase: str = None):
+        task_name = self._resolve_full_task_name(task_name)
+
+        DogePlugin._TASK_RELATION_MANAGER.add_task(task_name, task)
+        if phase:
+            DogePlugin._TASK_RELATION_MANAGER.add_dependency(phase, [task_name])
+
+    def add_dependency(self, task_name: str, dependencies: List[str]):
+        task_name = self._resolve_full_task_name(task_name)
+        dependencies = list(map(lambda n: self._resolve_full_task_name(n), dependencies))
+
+        DogePlugin._TASK_RELATION_MANAGER.add_dependency(task_name, dependencies)
+
+    def _resolve_full_task_name(self, task_name: str):
+        return self.__class__.get_name() + ":" + task_name

@@ -1,4 +1,4 @@
-from dogebuild import run
+from dogebuild.doge import run
 
 
 def main():
