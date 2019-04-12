@@ -111,8 +111,11 @@ TASK_RELATION_MANAGER.add_task('compile', skip)
 TASK_RELATION_MANAGER.add_task('test', skip)
 TASK_RELATION_MANAGER.add_dependency('test', ['compile'])
 
+TASK_RELATION_MANAGER.add_task('link', skip)
+TASK_RELATION_MANAGER.add_dependency('link', ['test'])
+
 TASK_RELATION_MANAGER.add_task('run', skip)
-TASK_RELATION_MANAGER.add_dependency('run', ['test'])
+TASK_RELATION_MANAGER.add_dependency('run', ['link'])
 
 # Documentation cycle
 
