@@ -60,7 +60,10 @@ def run_plugin(*task) -> int:
 
     for t in tsks:
         exit_code = t[1]()
-        if exit_code:
+        if not exit_code:
+            print('Task {} successfully terminated'.format(t[0]))
+        else:
+            print('Task {} failed'.format(t[0]))
             return exit_code
 
     return 0
