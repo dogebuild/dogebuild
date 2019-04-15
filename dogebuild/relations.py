@@ -38,9 +38,35 @@ class RelationManager:
 
 
 class TaskRelationManager:
-    def __init__(self):
+    DEFAULT_PHASES = {
+        'clean': [],
+        'docs': [],
+        'docs-deploy': ['docs'],
+        'sources': [],
+        'resources': [],
+        'test-sources': [],
+        'test-resources': [],
+        'test': ['sources', 'resources', 'test-sources', 'test-resources'],
+        'build': ['test'],
+        'run': ['build'],
+        'integration-test': ['build'],
+        'dist': ['integration-test'],
+        'deploy': ['dist'],
+        'install': ['dist'],
+    }
+
+    def __init__(self, phases: Dict[str, List[str]] = None):
         self._relation_manager = RelationManager()
         self._tasks = dict()
+
+        if not phases:
+            phases = TaskRelationManager.DEFAULT_PHASES
+
+        for task, dependencies in phases.items():
+            self.add_task(task, _skip)
+            self.add_dependency(task, dependencies)
+
+        self.verify()
 
     def add_task(self, task_name: str, task: Callable):
         self._tasks[task_name] = task
@@ -65,58 +91,5 @@ class TaskRelationManager:
                 raise Exception("Inconsistent task graph: unknown name '{}'".format(task_name))
 
 
-
-TASK_RELATION_MANAGER = TaskRelationManager()
-
-
-def task(name: str = None, depends: List[str] = None, phase: str = None):
-    if not depends:
-        depends = []
-
-    def decorator(task_callable):
-        task_name = name
-        if not task_name:
-            task_name = task_callable.__name__
-        task_name = 'dogefile:' + _sanitize_name(task_name)
-
-        TASK_RELATION_MANAGER.add_task(task_name, task_callable)
-        TASK_RELATION_MANAGER.add_dependency(task_name, depends)
-
-        if phase:
-            TASK_RELATION_MANAGER.add_dependency(phase, [task_name])
-
-        return task_callable
-
-    return decorator
-
-
-def _sanitize_name(name: str):
-    return name.replace('_', '-')
-
-
-def skip():
-    pass
-
-
-# Phases list
-
-# Clean cycle
-
-TASK_RELATION_MANAGER.add_task('clean', skip)
-
-# Compile cycle
-
-TASK_RELATION_MANAGER.add_task('compile', skip)
-
-TASK_RELATION_MANAGER.add_task('test', skip)
-TASK_RELATION_MANAGER.add_dependency('test', ['compile'])
-
-TASK_RELATION_MANAGER.add_task('link', skip)
-TASK_RELATION_MANAGER.add_dependency('link', ['test'])
-
-TASK_RELATION_MANAGER.add_task('run', skip)
-TASK_RELATION_MANAGER.add_dependency('run', ['link'])
-
-# Documentation cycle
-
-TASK_RELATION_MANAGER.add_task('docs', skip)
+def _skip():
+    return 0, {}

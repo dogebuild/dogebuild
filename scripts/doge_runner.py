@@ -1,8 +1,8 @@
-from dogebuild.doge import run
+from dogebuild.doge import _main
 
 
 def main():
-    run()
+    _main()
 
 
 if __name__ == '__main__':

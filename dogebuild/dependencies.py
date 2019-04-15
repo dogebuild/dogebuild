@@ -2,11 +2,15 @@ from subprocess import check_call
 import os
 from os import path
 from shutil import rmtree
-
 from typing import Tuple, Optional
+
+from dogebuild.context import ContextHolder
 
 
 class Dependency:
+    def __init__(self, **kwargs):
+        self.context = kwargs
+
     def get_id(self) -> Tuple[str, Optional[str]]:
         raise NotImplementedError
 
@@ -17,6 +21,9 @@ class Dependency:
         else:
             return '{} ({})'.format(id, version)
 
+    def acquire_dependency(self):
+        raise NotImplementedError()
+
 
 class GitDependency(Dependency):
     GIT_REPO_FOLDER = path.expanduser(path.join('~', '.doge', 'repo', 'git'))
@@ -25,7 +32,9 @@ class GitDependency(Dependency):
     VERSION_BRANCH = 'branch:'
     # TODO: make VERSION_COMMIT
 
-    def __init__(self, url, version):
+    def __init__(self, url, version, **kwargs):
+        super().__init__(**kwargs)
+
         self.url = url
         self.version = version
         self.original_version = None
@@ -77,7 +86,9 @@ class GitDependency(Dependency):
 
 
 class FolderDependency(Dependency):
-    def __init__(self, folder):
+    def __init__(self, folder, **kwargs):
+        super().__init__(**kwargs)
+
         self.folder = folder
         self.version = None
         self.original_version = None
@@ -93,10 +104,17 @@ class FolderDependency(Dependency):
         return self.folder, None
 
 
-def folder(folder: str) -> FolderDependency:
-    return FolderDependency(folder)
+def folder(folder: str, **kwargs) -> FolderDependency:
+    return FolderDependency(folder, **kwargs)
 
 
-def git(repo: str, version: str='branch:master') -> GitDependency:
-    return GitDependency(repo, version)
+def git(repo: str, version: str='branch:master', **kwargs) -> GitDependency:
+    return GitDependency(repo, version, **kwargs)
 
+
+def dependencies(*args):
+    ContextHolder.CONTEXT.dependencies += args
+
+
+def test_dependencies(*args):
+    ContextHolder.CONTEXT.test_dependencies += args
