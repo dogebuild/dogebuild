@@ -94,7 +94,7 @@ def _run_task_of_file(doge_file, *tasks) -> Tuple[int, Dict]:
             _add_artifacts(artifacts, current_artifacts)
         else:
             print('Task {} failed'.format(t[0]))
-            return exit_code
+            return exit_code, {}
 
     return 0, artifacts
 
