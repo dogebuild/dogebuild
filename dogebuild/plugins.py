@@ -23,6 +23,7 @@ class DogePlugin:
         self.relman.add_task(task_name, task)
         if phase:
             self.relman.add_dependency(phase, [task_name])
+            self.relman.add_dependency(task_name, self.relman.get_dependencies(phase))
 
     def add_dependency(self, task_name: str, dependencies: List[str]):
         task_name = self._resolve_full_task_name(task_name)

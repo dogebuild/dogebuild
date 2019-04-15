@@ -17,6 +17,9 @@ class RelationManager:
         for dependency in dependencies:
             self._edges[dependant].add(dependency)
 
+    def get_dependencies(self, key) -> List:
+        return self._edges.get(key, [])
+
     def get_dependencies_recursive(self, keys: List) -> List:
         result = OrderedDict()
 
@@ -74,6 +77,9 @@ class TaskRelationManager:
 
     def add_dependency(self, dependant: str, dependencies: List[str]):
         self._relation_manager.add_dependency(dependant, dependencies)
+
+    def get_dependencies(self, dependant: str) -> List[str]:
+        return self._relation_manager.get_dependencies(dependant)
 
     def get_tasks(self, task_names: List[str]) -> List[Tuple[str, Callable]]:
         task_names = self._relation_manager.get_dependencies_recursive(task_names)
