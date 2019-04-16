@@ -115,24 +115,12 @@ def _config_logging():
     console_format = '{log_color}{name}: {message}{reset}'
     console_level = 'DEBUG'
 
-    file_format = '{asctime} [{levelname}] {name} {message}'
-    file_level = 'DEBUG'
-
-    logging_level = logging.getLevelName(max(
-        logging.getLevelName(console_level),
-        logging.getLevelName(file_level),
-    ))
-
     logging.config.dictConfig({
         'version': 1,
         'formatters': {
             'colored': {
                 '()': 'colorlog.ColoredFormatter',
                 'format': console_format,
-                'style': '{',
-            },
-            'file': {
-                'format': file_format,
                 'style': '{',
             },
         },
@@ -142,21 +130,11 @@ def _config_logging():
                 'formatter': 'colored',
                 'level': console_level,
             },
-            'file': {
-                'class': 'logging.FileHandler',
-                'formatter': 'file',
-                'level': file_level,
-                'filename': 'dogebuild.log',
-                'mode': 'w',
-            }
         },
         'loggers': {
             '': {
-                'handlers': [
-                    'console',
-                    'file',
-                ],
-                'level': logging_level,
+                'handlers': ['console'],
+                'level': console_level,
             },
         },
     })
