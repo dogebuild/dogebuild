@@ -24,6 +24,7 @@ setup(
         'pip',
         'virtualenv',
         'toposort==1.5',
+        'colorlog==4.0.2',
     ],
     classifiers=[
         'Development Status :: 2 - Pre-Alpha',

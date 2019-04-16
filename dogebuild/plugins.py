@@ -1,3 +1,4 @@
+from logging import getLogger
 from typing import Callable, List
 
 from dogebuild.context import ContextHolder
@@ -11,6 +12,8 @@ class DogePlugin:
         return cls.NAME
 
     def __init__(self, **kwargs):
+        self.logger = getLogger(self.get_name())
+
         ContextHolder.CONTEXT.plugins.append(self)
 
         self.relman = ContextHolder.CONTEXT.relman

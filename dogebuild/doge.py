@@ -2,6 +2,8 @@ import argparse
 import sys
 import os
 from typing import List, Callable, Optional, Tuple, Dict
+import logging
+import logging.config
 
 from dogebuild.common import DOGE_FILE
 from dogebuild.dependencies import Dependency
@@ -10,6 +12,8 @@ from dogebuild.dogefile_loader import load_doge_file
 
 
 def _main() -> None:
+    _config_logging()
+
     main_parser = argparse.ArgumentParser(description='')
     main_parser.add_argument('command', nargs=1)
     main_parser.add_argument('options', nargs=argparse.REMAINDER)
@@ -73,27 +77,27 @@ def _run_task_of_file(doge_file, *tasks) -> Tuple[int, Dict]:
     test_dependencies = context.test_dependencies
 
     for dependency in dependencies + test_dependencies:
-        print('Resolving dependency {}'.format(dependency))
+        logging.info('Resolving dependency {}'.format(dependency))
         dependency.acquire_dependency()
         code, artifacts = _run_task_of_file(os.path.join(dependency.get_doge_file_folder(), DOGE_FILE), 'build')
         if not code:
             dependency.artifacts = artifacts
         else:
-            print('Dependency {} build failed'.format(dependency))
+            logging.error('Dependency {} build failed'.format(dependency))
             return code, {}
 
     run_list = relman.get_tasks(tasks)
-    print('Run tasks: {}'.format(', '.join(map(lambda x: x[0], run_list))))
+    logging.info('Run tasks: {}'.format(', '.join(map(lambda x: x[0], run_list))))
 
     os.chdir(doge_directory)
     artifacts = {}
     for t in run_list:
         exit_code, current_artifacts = t[1]()
         if not exit_code:
-            print('Task {} successfully terminated'.format(t[0]))
+            logging.debug('Task {} successfully terminated'.format(t[0]))
             _add_artifacts(artifacts, current_artifacts)
         else:
-            print('Task {} failed'.format(t[0]))
+            logging.error('Task {} failed'.format(t[0]))
             return exit_code, {}
 
     return 0, artifacts
@@ -105,3 +109,54 @@ def _add_artifacts(main: Dict, add: Dict):
             main[type] += artifacts
         else:
             main[type] = artifacts
+
+
+def _config_logging():
+    console_format = '{log_color}{name}: {message}{reset}'
+    console_level = 'DEBUG'
+
+    file_format = '{asctime} [{levelname}] {name} {message}'
+    file_level = 'DEBUG'
+
+    logging_level = logging.getLevelName(max(
+        logging.getLevelName(console_level),
+        logging.getLevelName(file_level),
+    ))
+
+    logging.config.dictConfig({
+        'version': 1,
+        'formatters': {
+            'colored': {
+                '()': 'colorlog.ColoredFormatter',
+                'format': console_format,
+                'style': '{',
+            },
+            'file': {
+                'format': file_format,
+                'style': '{',
+            },
+        },
+        'handlers': {
+            'console': {
+                'class': 'logging.StreamHandler',
+                'formatter': 'colored',
+                'level': console_level,
+            },
+            'file': {
+                'class': 'logging.FileHandler',
+                'formatter': 'file',
+                'level': file_level,
+                'filename': 'dogebuild.log',
+                'mode': 'w',
+            }
+        },
+        'loggers': {
+            '': {
+                'handlers': [
+                    'console',
+                    'file',
+                ],
+                'level': logging_level,
+            },
+        },
+    })

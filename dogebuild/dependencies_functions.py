@@ -1,3 +1,4 @@
+import logging
 from os import path
 from typing import List, Optional
 
@@ -18,7 +19,7 @@ def resolve_dependency_tree(dependencies: List[Dependency], parents: List[str] =
         if version != use_version:
             d.original_version = d.version
             d.version = use_version
-        print('Acquiring {} ...'.format(d))
+        logging.info('Acquiring {} ...'.format(d))
         d.acquire_dependency()
         deps, _ = load_doge_file(path.join(d.get_doge_file_folder(), DOGE_FILE))
         d.dependencies = resolve_dependency_tree(deps, parents + [id])
