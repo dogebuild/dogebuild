@@ -1,38 +1,50 @@
 from setuptools import setup, find_packages
+from os import path
+
+
+project_directory = path.abspath(path.dirname(__file__))
+data_files = []
+
+
+def load_from(file_name):
+    data_files.append(file_name)
+    with open(path.join(project_directory, file_name), encoding='utf-8') as f:
+        return f.read()
+
 
 setup(
     name='dogebuild',
-    version='0.1.0.dev2',
+    version=load_from('dogebuild.version').strip(),
     description='Builder with plugin system',
+    url='https://github.com/dogebuild/dogebuild',
     author='Kirill Sulim',
     author_email='kirillsulim@gmail.com',
     license='MIT',
-    url='https://github.com/dogebuild/dogebuild',
     packages=find_packages(include=[
-        'dogebuild*',
-        ]),
+        'dogebuild',
+    ]),
     scripts=[
-        'doge_script.py',
-        ],
+        'scripts/doge_runner.py',
+    ],
     entry_points={
         'console_scripts': [
-            'doge = doge_script:run_doge',
-            ],
+            'doge = doge_runner:main',
+        ],
     },
     test_suite='tests',
     install_requires=[
         'pip',
         'virtualenv',
+        'toposort==1.5',
+        'colorlog==4.0.2',
     ],
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
         'Natural Language :: English',
         'Operating System :: OS Independent',
-        'Programming Language :: Python :: 3.3',
-        'Programming Language :: Python :: 3.4',
         'Topic :: Software Development',
     ],
     keywords='dogebuild builder',
