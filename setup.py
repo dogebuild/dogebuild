@@ -1,13 +1,25 @@
 from setuptools import setup, find_packages
+from os import path
+
+
+project_directory = path.abspath(path.dirname(__file__))
+data_files = []
+
+
+def load_from(file_name):
+    data_files.append(file_name)
+    with open(path.join(project_directory, file_name), encoding='utf-8') as f:
+        return f.read()
+
 
 setup(
     name='dogebuild',
-    version='0.0.1',
+    version=load_from('dogebuild.version').strip(),
     description='Builder with plugin system',
+    url='https://github.com/dogebuild/dogebuild',
     author='Kirill Sulim',
     author_email='kirillsulim@gmail.com',
     license='MIT',
-    url='https://github.com/dogebuild/dogebuild',
     packages=find_packages(include=[
         'dogebuild',
     ]),
@@ -27,7 +39,7 @@ setup(
         'colorlog==4.0.2',
     ],
     classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
+        'Development Status :: 3 - Alpha',
         'Environment :: Console',
         'Intended Audience :: Developers',
         'License :: OSI Approved :: MIT License',
