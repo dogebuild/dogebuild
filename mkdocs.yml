@@ -1,0 +1,12 @@
+site_name: Dogebuild
+theme: readthedocs
+markdown_extensions:
+  - toc:
+      permalink: True
+nav:
+  - Quick start: index.md
+  - Dogefile.py format: dogefile.py-format.md
+  - Phases and lifecycle: lifecycle.md
+  - Create plugin: how-to-write-plugin.md
+  - Create dependency resolver: how-to-write-dependency-resolver.md
+

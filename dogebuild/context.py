@@ -25,5 +25,5 @@ class ContextHolder:
         return context
 
 
-def rewrite_phases(phases: Dict[str, List[str]] = None):
+def lifecycle(phases: Dict[str, List[str]] = None):
     ContextHolder.create(phases)
