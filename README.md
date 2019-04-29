@@ -1,7 +1,7 @@
 # dogebuild
 
-[![PyPI version](https://badge.fury.io/py/dogebuild.svg)](https://badge.fury.io/py/dogebuild)
 [![Build Status](https://travis-ci.org/dogebuild/dogebuild.svg?branch=master)](https://travis-ci.org/dogebuild/dogebuild)
+[![PyPI version](https://badge.fury.io/py/dogebuild.svg)](https://badge.fury.io/py/dogebuild)
 [![Documentation Status](https://readthedocs.org/projects/dogebuild/badge/?version=latest)](https://dogebuild.readthedocs.io/en/latest/?badge=latest)
 
 General purpose build manager mainly designed to build C++ projects which
