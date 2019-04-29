@@ -24,10 +24,13 @@ pip install tapas
 To create project template run
 
 ```sh
-tapas dogebuild-c
+tapas <template-name>
 ```
 
 and follow tapas instructions.
+
+Selected template names:
+- `dogebuild-c` - for C and C++ projects
 
 ## Build existing project
 
