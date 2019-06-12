@@ -61,11 +61,13 @@ class TaskRelationManager:
     def __init__(self, phases: Dict[str, List[str]] = None):
         self._relation_manager = RelationManager()
         self._tasks = dict()
+        self._tasks_short_names = dict()
 
         if not phases:
             phases = TaskRelationManager.DEFAULT_PHASES
+        self._phases = phases
 
-        for task, dependencies in phases.items():
+        for task, dependencies in self._phases.items():
             self.add_task(task, _skip)
             self.add_dependency(task, dependencies)
 
@@ -75,6 +77,14 @@ class TaskRelationManager:
         self._tasks[task_name] = task
         self._relation_manager.add_dependency(task_name, [])
 
+        short_name = TaskRelationManager._get_task_short_name(task_name)
+        if short_name in self._phases.keys():
+            return
+        if short_name in self._tasks_short_names:
+            self._tasks_short_names[short_name].append(task_name)
+        else:
+            self._tasks_short_names[short_name] = [task_name]
+
     def add_dependency(self, dependant: str, dependencies: List[str]):
         self._relation_manager.add_dependency(dependant, dependencies)
 
@@ -82,7 +92,18 @@ class TaskRelationManager:
         return self._relation_manager.get_dependencies(dependant)
 
     def get_tasks(self, task_names: List[str]) -> List[Tuple[str, Callable]]:
-        task_names = self._relation_manager.get_dependencies_recursive(task_names)
+        full_names = []
+        for name in task_names:
+            if name in self._tasks_short_names:
+                full_name = self._tasks_short_names[name]
+                if len(full_name) == 1:
+                    full_names.append(full_name[0])
+                else:
+                    raise Exception('Multiple tasks with short name ' + name)
+            else:
+                full_names.append(name)
+
+        task_names = self._relation_manager.get_dependencies_recursive(full_names)
         return list(map(lambda name: (name, self._tasks[name]), task_names))
 
     def verify(self):
@@ -95,6 +116,19 @@ class TaskRelationManager:
         for task_name in known_task_names:
             if task_name not in self._tasks.keys():
                 raise Exception("Inconsistent task graph: unknown name '{}'".format(task_name))
+
+    @staticmethod
+    def _get_task_short_name(task_name: str) -> str:
+        split = task_name.split(':', maxsplit=2)
+        if len(split) == 2:
+            return split[1]
+        else:
+            return task_name
+
+    @staticmethod
+    def is_task_short_name(task_name: str) -> bool:
+        split = task_name.split(':', maxsplit=2)
+        return len(split) == 1
 
 
 def _skip():

@@ -91,13 +91,21 @@ def _run_task_of_file(doge_file, *tasks) -> Tuple[int, Dict]:
 
     os.chdir(doge_directory)
     artifacts = {}
-    for t in run_list:
-        exit_code, current_artifacts = t[1]()
+    for current_task in run_list:
+        try:
+            res = current_task[1]()
+            if res is None:
+                res = (0, {})
+        except Exception as e:
+            logging.exception(e)
+            res = (1, {})
+
+        exit_code, current_artifacts = res
         if not exit_code:
-            logging.debug('Task {} successfully terminated'.format(t[0]))
+            logging.debug('Task {} successfully terminated'.format(current_task[0]))
             _add_artifacts(artifacts, current_artifacts)
         else:
-            logging.error('Task {} failed'.format(t[0]))
+            logging.error('Task {} failed'.format(current_task[0]))
             return exit_code, {}
 
     return 0, artifacts
@@ -129,6 +137,7 @@ def _config_logging():
                 'class': 'logging.StreamHandler',
                 'formatter': 'colored',
                 'level': console_level,
+                'stream': sys.stdout,
             },
         },
         'loggers': {
