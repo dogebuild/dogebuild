@@ -63,7 +63,7 @@ class TaskRelationManager:
         self._tasks = dict()
         self._tasks_short_names = dict()
 
-        if not phases:
+        if phases is None:
             phases = TaskRelationManager.DEFAULT_PHASES
         self._phases = phases
 

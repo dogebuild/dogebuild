@@ -9,17 +9,18 @@ class Context:
         self.plugins = []
         self.dependencies = []
         self.test_dependencies = []
+        self.code_context = {}
 
 
 class ContextHolder:
     CONTEXT = None
 
     @staticmethod
-    def create(phases=None):
+    def create(phases=None) -> Context:
         ContextHolder.CONTEXT = Context(phases)
 
     @staticmethod
-    def clear_and_get():
+    def clear_and_get() -> Context:
         context = ContextHolder.CONTEXT
         ContextHolder.CONTEXT = None
         return context
@@ -27,3 +28,7 @@ class ContextHolder:
 
 def lifecycle(phases: Dict[str, List[str]] = None):
     ContextHolder.create(phases)
+
+
+def make_mode():
+    lifecycle({})

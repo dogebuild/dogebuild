@@ -4,11 +4,13 @@ import os
 from typing import List, Callable, Optional, Tuple, Dict
 import logging
 import logging.config
+from pathlib import Path
 
-from dogebuild.common import DOGE_FILE
+from dogebuild.common import DOGE_FILE, sanitize_name, GlobalsContext
 from dogebuild.dependencies import Dependency
 from dogebuild.dependencies_functions import resolve_dependency_tree
 from dogebuild.dogefile_loader import load_doge_file
+from dogebuild.logging import _config_logging
 
 
 def _main() -> None:
@@ -64,9 +66,9 @@ def _run_tasks(*tasks) -> int:
 
 
 def _run_task_of_file(doge_file, *tasks) -> Tuple[int, Dict]:
-    abs_path = os.path.abspath(doge_file)
-    doge_directory = os.path.dirname(abs_path)
-    doge_file_name = os.path.basename(abs_path)
+    abs_path = Path(doge_file).resolve().absolute()
+    doge_directory = abs_path.parent
+    doge_file_name = None
 
     context = load_doge_file(abs_path)
 
@@ -86,16 +88,17 @@ def _run_task_of_file(doge_file, *tasks) -> Tuple[int, Dict]:
             logging.error('Dependency {} build failed'.format(dependency))
             return code, {}
 
-    run_list = relman.get_tasks(tasks)
+    run_list = relman.get_tasks(map(sanitize_name, tasks))
     logging.info('Run tasks: {}'.format(', '.join(map(lambda x: x[0], run_list))))
 
     os.chdir(doge_directory)
     artifacts = {}
     for current_task in run_list:
         try:
-            res = current_task[1]()
-            if res is None:
-                res = (0, {})
+            with GlobalsContext(current_task[1].__globals__):
+                res = current_task[1]()
+                if res is None:
+                    res = (0, {})
         except Exception as e:
             logging.exception(e)
             res = (1, {})
@@ -119,31 +122,3 @@ def _add_artifacts(main: Dict, add: Dict):
             main[type] = artifacts
 
 
-def _config_logging():
-    console_format = '{log_color}{name}: {message}{reset}'
-    console_level = 'DEBUG'
-
-    logging.config.dictConfig({
-        'version': 1,
-        'formatters': {
-            'colored': {
-                '()': 'colorlog.ColoredFormatter',
-                'format': console_format,
-                'style': '{',
-            },
-        },
-        'handlers': {
-            'console': {
-                'class': 'logging.StreamHandler',
-                'formatter': 'colored',
-                'level': console_level,
-                'stream': sys.stdout,
-            },
-        },
-        'loggers': {
-            '': {
-                'handlers': ['console'],
-                'level': console_level,
-            },
-        },
-    })
