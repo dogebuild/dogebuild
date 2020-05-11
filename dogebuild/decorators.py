@@ -19,7 +19,7 @@ def task(task_callable: Callable = None, *, name: str = None, depends: List[str]
     for dependency in depends:
         if TaskRelationManager.is_task_short_name(dependency):
             dependency = DOGEFILE_TASK_PREFIX + dependency
-        full_name_depends.append(dependency)
+        full_name_depends.append(sanitize_name(dependency))
     depends = full_name_depends
 
     relman = ContextHolder.CONTEXT.relman

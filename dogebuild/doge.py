@@ -95,15 +95,13 @@ def _run_task_of_file(doge_file, *tasks) -> Tuple[int, Dict]:
     artifacts = {}
     for current_task in run_list:
         try:
-            with GlobalsContext(current_task[1].__globals__):
-                res = current_task[1]()
-                if res is None:
-                    res = (0, {})
+            name = current_task[1].__name__
+            exec(f'{name}()', current_task[1].__globals__)
         except Exception as e:
             logging.exception(e)
             res = (1, {})
 
-        exit_code, current_artifacts = res
+        exit_code, current_artifacts = 0, {}
         if not exit_code:
             logging.debug('Task {} successfully terminated'.format(current_task[0]))
             _add_artifacts(artifacts, current_artifacts)
