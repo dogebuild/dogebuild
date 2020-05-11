@@ -1,5 +1,4 @@
-#include "lib/tools.h"
-#include <string>
+#include "library/tools.h"
 
 int main() {
 	hello("world");
