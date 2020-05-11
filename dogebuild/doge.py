@@ -5,8 +5,9 @@ from typing import List, Callable, Optional, Tuple, Dict
 import logging
 import logging.config
 from pathlib import Path
+from inspect import signature
 
-from dogebuild.common import DOGE_FILE, sanitize_name, GlobalsContext
+from dogebuild.common import DOGE_FILE, sanitize_name, GlobalsContext, merge_dicts
 from dogebuild.dependencies import Dependency
 from dogebuild.dependencies_functions import resolve_dependency_tree
 from dogebuild.dogefile_loader import load_doge_file
@@ -82,8 +83,12 @@ def _run_task_of_file(doge_file, *tasks) -> Tuple[int, Dict]:
         logging.info('Resolving dependency {}'.format(dependency))
         dependency.acquire_dependency()
         code, artifacts = _run_task_of_file(os.path.join(dependency.get_doge_file_folder(), DOGE_FILE), 'build')
+        absolute_artifacts = {}
+        dff = Path(dependency.get_doge_file_folder()).resolve()
+        for k, v in artifacts.items():
+            absolute_artifacts[k] = list(map(lambda d: dff / d, v))
         if not code:
-            dependency.artifacts = artifacts
+            dependency.artifacts = absolute_artifacts
         else:
             logging.error('Dependency {} build failed'.format(dependency))
             return code, {}
@@ -92,12 +97,19 @@ def _run_task_of_file(doge_file, *tasks) -> Tuple[int, Dict]:
     logging.info('Run tasks: {}'.format(', '.join(map(lambda x: x[0], run_list))))
 
     os.chdir(doge_directory)
-    artifacts = {}
+    artifacts = merge_dicts(*[dependency.artifacts for dependency in dependencies])
+
     for current_task in run_list:
         try:
+            sig = signature(current_task[1])
+            locals_values = {}
+            for arg in sig.parameters:
+                locals_values[arg] = artifacts.get(arg, [])
             name = current_task[1].__name__
-            exec(f'RESULT = {name}()', current_task[1].__globals__, {})
-            res = current_task[1].__globals__.get('RESULT', (0, {}))
+            exec(f'RESULT = {name}({", ".join(locals_values.keys())})', current_task[1].__globals__, locals_values)
+            res = locals_values.get('RESULT')
+            if res is None:
+                res = (0, {})
         except Exception as e:
             logging.exception(e)
             res = (1, {})

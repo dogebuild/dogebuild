@@ -21,6 +21,16 @@ def sanitize_name(name: str):
     return name.replace('_', '-')
 
 
+def merge_dicts(*dicts: Dict[str, List]):
+    result = {}
+    for d in dicts:
+        for k, v in d.items():
+            if k not in result:
+                result[k] = []
+            result[k].extend(v)
+    return result
+
+
 class GlobalsContext:
     def __init__(self, context: Dict):
         self.context = context
