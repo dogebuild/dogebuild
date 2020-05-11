@@ -16,10 +16,10 @@ class TestRelationManager(TestCase):
             ['Fire', 'Water']
         )
 
-        coffeeList = rm.get_dependencies_recursive(['Coffee'])
-        self.assertLess(coffeeList.index('Fire'), coffeeList.index('Water'))
-        self.assertEqual(coffeeList[-1], 'Coffee')
+        coffee_list = rm.get_dependencies_recursive(['Coffee'])
+        self.assertLess(coffee_list.index('Fire'), coffee_list.index('Water'))
+        self.assertEqual(coffee_list[-1], 'Coffee')
 
-        teaList = rm.get_dependencies_recursive(['Tea'])
-        self.assertLess(teaList.index('Fire'), coffeeList.index('Water'))
-        self.assertEqual(teaList[-1], 'Tea')
+        tea_list = rm.get_dependencies_recursive(['Tea'])
+        self.assertLess(tea_list.index('Fire'), coffee_list.index('Water'))
+        self.assertEqual(tea_list[-1], 'Tea')

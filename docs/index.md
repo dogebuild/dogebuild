@@ -32,6 +32,11 @@ and follow tapas instructions.
 Selected template names:
 - `dogebuild-c` - for C and C++ projects
 
+## Simple manual solution
+
+In case you didn't want to use any plugins, you can write `dogefile.py` from scratch.
+
+
 ## Build existing project
 
 To build existing project run `doge` script with build task name (usually `build`):
