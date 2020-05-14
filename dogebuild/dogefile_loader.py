@@ -1,9 +1,7 @@
 from typing import Dict
-import os
 from pathlib import Path
 
-from dogebuild.dogefile_internals.context import ContextHolder, Context, ContextHolderGuard
-from dogebuild.common import DOGE_FILE
+from dogebuild.dogefile_internals.context import Context, ContextHolderGuard
 
 
 def load_doge_file(dogefile: Path) -> Context:

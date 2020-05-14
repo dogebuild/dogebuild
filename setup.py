@@ -22,6 +22,7 @@ setup(
     license='MIT',
     packages=find_packages(include=[
         'dogebuild',
+        'dogebuild.*',
     ]),
     package_data={
         'dogebuild': [
