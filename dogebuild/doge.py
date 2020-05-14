@@ -7,8 +7,8 @@ import logging.config
 from pathlib import Path
 from inspect import signature
 
-from dogebuild.common import DOGE_FILE, sanitize_name, GlobalsContext, merge_dicts
-from dogebuild.dependencies import Dependency
+from dogebuild.common import DOGE_FILE, sanitize_name, merge_dicts
+from dogebuild.dogefile_internals.dependencies import Dependency
 from dogebuild.dependencies_functions import resolve_dependency_tree
 from dogebuild.dogefile_loader import load_doge_file
 from dogebuild.logging import _config_logging
@@ -72,6 +72,8 @@ def _run_task_of_file(doge_file, *tasks) -> Tuple[int, Dict]:
     doge_file_name = None
 
     context = load_doge_file(abs_path)
+    for submodule in context.modules:
+        _run_task_of_file(doge_directory / submodule / DOGE_FILE, *tasks)
 
     relman = context.relman
     relman.verify()
@@ -80,7 +82,7 @@ def _run_task_of_file(doge_file, *tasks) -> Tuple[int, Dict]:
     test_dependencies = context.test_dependencies
 
     for dependency in dependencies + test_dependencies:
-        logging.info('Resolving dependency {}'.format(dependency))
+        logging.info(f'Resolving dependency {dependency}')
         dependency.acquire_dependency()
         code, artifacts = _run_task_of_file(os.path.join(dependency.get_doge_file_folder(), DOGE_FILE), 'build')
         absolute_artifacts = {}

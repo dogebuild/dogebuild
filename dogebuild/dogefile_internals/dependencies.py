@@ -1,10 +1,11 @@
+from typing import Tuple, Optional
 from subprocess import check_call
 import os
 from os import path
+from pathlib import Path
 from shutil import rmtree
-from typing import Tuple, Optional
 
-from dogebuild.context import ContextHolder
+from dogebuild.dogefile_internals.context import ContextHolder
 
 
 class Dependency:
@@ -89,7 +90,7 @@ class FolderDependency(Dependency):
     def __init__(self, folder, **kwargs):
         super().__init__(**kwargs)
 
-        self.folder = folder
+        self.folder = Path(folder).resolve()
         self.version = None
         self.original_version = None
         self.dependencies = []
@@ -97,11 +98,11 @@ class FolderDependency(Dependency):
     def acquire_dependency(self):
         pass
 
-    def get_doge_file_folder(self):
+    def get_doge_file_folder(self) -> Path:
         return self.folder
 
     def get_id(self) -> Tuple[str, Optional[str]]:
-        return self.folder, None
+        return str(self.folder), None
 
 
 def folder(folder: str, **kwargs) -> FolderDependency:
@@ -113,8 +114,8 @@ def git(repo: str, version: str='branch:master', **kwargs) -> GitDependency:
 
 
 def dependencies(*args):
-    ContextHolder.CONTEXT.dependencies += args
+    ContextHolder.INSTANCE.context.dependencies += args
 
 
 def test_dependencies(*args):
-    ContextHolder.CONTEXT.test_dependencies += args
+    ContextHolder.INSTANCE.context.test_dependencies += args

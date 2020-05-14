@@ -1,6 +1,6 @@
 from unittest import TestCase
 
-from dogebuild.relations import RelationManager
+from dogebuild.dogefile_internals.relations import RelationManager
 
 
 class TestRelationManager(TestCase):

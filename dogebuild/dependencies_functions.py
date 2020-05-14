@@ -3,7 +3,7 @@ from os import path
 from typing import List, Optional
 
 from .common import DOGE_FILE
-from .dependencies import Dependency
+from dogebuild.dogefile_internals.dependencies import Dependency
 from .dogefile_loader import load_doge_file
 
 

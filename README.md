@@ -20,7 +20,7 @@ An example of `dogefile.py`:
 
 ```python
 from dogebuild_c.c_plugin import CPlugin, BinaryType
-from dogebuild.dependencies import dependencies, folder
+from dogebuild.dogefile_internals.dependencies import dependencies, folder
 
 dependencies(
     folder('../dependency')

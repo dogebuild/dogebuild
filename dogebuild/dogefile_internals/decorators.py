@@ -1,8 +1,8 @@
 from typing import List, Callable
 
 from dogebuild.common import sanitize_name
-from dogebuild.context import ContextHolder
-from dogebuild.relations import TaskRelationManager
+from dogebuild.dogefile_internals.context import ContextHolder
+from dogebuild.dogefile_internals.relations import TaskRelationManager
 
 
 DOGEFILE_TASK_PREFIX = 'dogefile:'
@@ -22,7 +22,7 @@ def task(task_callable: Callable = None, *, name: str = None, depends: List[str]
         full_name_depends.append(sanitize_name(dependency))
     depends = full_name_depends
 
-    relman = ContextHolder.CONTEXT.relman
+    relman = ContextHolder.INSTANCE.context.relman
     task_name = name
     if not task_name:
         task_name = task_callable.__name__

@@ -1,7 +1,7 @@
 from logging import getLogger
 from typing import Callable, List
 
-from dogebuild.context import ContextHolder
+from dogebuild.dogefile_internals.context import ContextHolder
 
 
 class DogePlugin:
@@ -14,11 +14,11 @@ class DogePlugin:
     def __init__(self, **kwargs):
         self.logger = getLogger(self.get_name())
 
-        ContextHolder.CONTEXT.plugins.append(self)
+        ContextHolder.INSTANCE.context.plugins.append(self)
 
-        self.relman = ContextHolder.CONTEXT.relman
-        self.dependencies = ContextHolder.CONTEXT.dependencies
-        self.test_dependencies = ContextHolder.CONTEXT.test_dependencies
+        self.relman = ContextHolder.INSTANCE.context.relman
+        self.dependencies = ContextHolder.INSTANCE.context.dependencies
+        self.test_dependencies = ContextHolder.INSTANCE.context.test_dependencies
 
     def add_task(self, task_name: str, task: Callable, phase: str = None):
         task_name = self._resolve_full_task_name(task_name)
