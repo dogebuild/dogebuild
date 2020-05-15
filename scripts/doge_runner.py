@@ -1,8 +1,11 @@
-from dogebuild.doge import _main
+import sys
+
+from dogebuild.controller import DogeController
 
 
 def main():
-    _main()
+    controller = DogeController(sys.argv[1:])
+    exit(controller.run())
 
 
 if __name__ == '__main__':

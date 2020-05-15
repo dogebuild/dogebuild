@@ -11,12 +11,9 @@ from dogebuild.common import DOGE_FILE, sanitize_name, merge_dicts
 from dogebuild.dogefile_internals.dependencies import Dependency
 from dogebuild.dependencies_functions import resolve_dependency_tree
 from dogebuild.dogefile_loader import load_doge_file
-from dogebuild.logging import _config_logging
 
 
 def _main() -> None:
-    _config_logging()
-
     main_parser = argparse.ArgumentParser(description='')
     main_parser.add_argument('command', nargs=1)
     main_parser.add_argument('options', nargs=argparse.REMAINDER)
