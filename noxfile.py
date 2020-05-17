@@ -5,7 +5,14 @@ from itertools import chain
 
 LINE_LENGTH = 120
 
-STYLE_TARGETS = ["dogebuild", "integration_tests", "scripts", "tests", "noxfile.py", "setup.py"]
+STYLE_TARGETS = [
+    "dogebuild",
+    "integration_tests",
+    "scripts",
+    "tests",
+    "noxfile.py",
+    "setup.py",
+]
 
 FLAKE8_IGNORE = ["E203", "E231", "W503"]
 
