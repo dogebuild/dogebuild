@@ -14,12 +14,23 @@ STYLE_TARGETS = [
     "setup.py",
 ]
 
-FLAKE8_IGNORE = ["E203", "E231", "W503"]
+FLAKE8_IGNORE = [
+    "E203",
+    "E231",
+    "W503",
+]
+
+
+@nox.session
+def unit_tests(session):
+    session.install(".")
+    session.install("pytest")
+    session.run("pytest", "tests")
 
 
 @nox.session
 @nox.parametrize("build_dir", list(Path("./integration_tests/builds").glob("*")))
-def run_tests(session, build_dir):
+def integration_tests(session, build_dir):
     session.install(".")
     session.cd(str(build_dir))
     session.run("doge", "build")
