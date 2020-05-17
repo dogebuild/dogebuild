@@ -7,8 +7,10 @@ python:
 - "3.8"
 install:
 - python setup.py install
+before_script:
+- pip install nox
 script:
-- python setup.py test
+- nox
 stages:
 - test
 - name: deploy
