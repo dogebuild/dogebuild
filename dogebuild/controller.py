@@ -9,8 +9,7 @@ from dogebuild.doge import DogeFile
 
 class DogeController:
 
-    COMMAND_MAP = {
-    }
+    COMMAND_MAP = {}
 
     def __init__(self, args):
         self.args = self._parse_args(args)
@@ -22,10 +21,10 @@ class DogeController:
 
     @staticmethod
     def _parse_args(args) -> argparse.Namespace:
-        main_parser = argparse.ArgumentParser(prog='doge', description='')
-        main_parser.add_argument('--file', default=DOGE_FILE, type=Path)
-        main_parser.add_argument('command', nargs=1)
-        main_parser.add_argument('options', nargs=argparse.REMAINDER)
+        main_parser = argparse.ArgumentParser(prog="doge", description="")
+        main_parser.add_argument("--file", default=DOGE_FILE, type=Path)
+        main_parser.add_argument("command", nargs=1)
+        main_parser.add_argument("options", nargs=argparse.REMAINDER)
 
         main_args = main_parser.parse_args(args)
 
@@ -39,30 +38,27 @@ class DogeController:
 
     @staticmethod
     def _config_logging():
-        console_format = '{log_color}{name}: {message}{reset}'
-        console_level = 'DEBUG'
+        console_format = "{log_color}{name}: {message}{reset}"
+        console_level = "DEBUG"
 
-        logging.config.dictConfig({
-            'version': 1,
-            'formatters': {
-                'colored': {
-                    '()': 'colorlog.ColoredFormatter',
-                    'format': console_format,
-                    'style': '{',
+        logging.config.dictConfig(
+            {
+                "version": 1,
+                "formatters": {
+                    "colored": {
+                        "()": "colorlog.ColoredFormatter",
+                        "format": console_format,
+                        "style": "{",
+                    },
                 },
-            },
-            'handlers': {
-                'console': {
-                    'class': 'logging.StreamHandler',
-                    'formatter': 'colored',
-                    'level': console_level,
-                    'stream': sys.stdout,
+                "handlers": {
+                    "console": {
+                        "class": "logging.StreamHandler",
+                        "formatter": "colored",
+                        "level": console_level,
+                        "stream": sys.stdout,
+                    },
                 },
-            },
-            'loggers': {
-                '': {
-                    'handlers': ['console'],
-                    'level': console_level,
-                },
-            },
-        })
+                "loggers": {"": {"handlers": ["console"], "level": console_level,},},
+            }
+        )

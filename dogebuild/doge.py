@@ -44,18 +44,22 @@ class DogeFile:
             self._resolve_dependencies()
 
             run_list = self.relman.get_tasks(map(sanitize_name, tasks))
-            logging.info('Run tasks: {}'.format(', '.join(map(lambda x: x[0], run_list))))
+            logging.info(
+                "Run tasks: {}".format(", ".join(map(lambda x: x[0], run_list)))
+            )
 
             for current_task in run_list:
                 self._run_task(current_task)
 
     def _resolve_dependencies(self):
         for dependency in self.dependencies + self.test_dependencies:
-            logging.info(f'Resolving dependency {dependency}')
+            logging.info(f"Resolving dependency {dependency}")
             dependency.acquire_dependency()
 
-            dependency_doge_file = DogeFile(Path(dependency.get_doge_file_folder()) / DOGE_FILE)
-            dependency_doge_file.run_tasks(['build'])
+            dependency_doge_file = DogeFile(
+                Path(dependency.get_doge_file_folder()) / DOGE_FILE
+            )
+            dependency_doge_file.run_tasks(["build"])
 
             absolute_artifacts = {}
             dff = Path(dependency.get_doge_file_folder()).resolve()
@@ -77,9 +81,13 @@ class DogeFile:
             for arg in sig.parameters:
                 locals_values[arg] = self.artifacts.get(arg, [])
             callable_name = task[1].__name__
-            exec(f'RESULT = {callable_name}({", ".join(locals_values.keys())})', self.code_context, locals_values)
+            exec(
+                f'RESULT = {callable_name}({", ".join(locals_values.keys())})',
+                self.code_context,
+                locals_values,
+            )
 
-            res = locals_values.get('RESULT')
+            res = locals_values.get("RESULT")
             if res is None:
                 res = (0, {})
             res = (*res, None)
@@ -90,9 +98,9 @@ class DogeFile:
         exit_code, artifacts, error = res
         if not exit_code:
             self._add_artifacts(artifacts)
-            logging.debug(f'Task {task_name} successfully terminated')
+            logging.debug(f"Task {task_name} successfully terminated")
         else:
-            logging.error(f'Task {task_name} failed')
+            logging.error(f"Task {task_name} failed")
 
         task_result = TaskResult(exit_code, artifacts, error)
         self.processed_tasks[task_name] = task_result
@@ -107,8 +115,8 @@ class DogeFile:
 
     @staticmethod
     def _load_doge_file(doge_file: Path) -> Context:
-        with open(doge_file, 'r') as file, ContextHolderGuard(doge_file) as holder:
-            code = compile(file.read(), doge_file.name, 'exec')
+        with open(doge_file, "r") as file, ContextHolderGuard(doge_file) as holder:
+            code = compile(file.read(), doge_file.name, "exec")
             exec(code, holder.globals_context)
             holder.context.verify()
             return holder.context
@@ -123,7 +131,11 @@ class DogeFile:
         for d in dependencies:
             if d.original_version:
                 print(
-                    ' ' * (2 * inner_level - 1) + '+' + str(d) + ' conflict resolved for {}'.format(d.original_version))
+                    " " * (2 * inner_level - 1)
+                    + "+"
+                    + str(d)
+                    + " conflict resolved for {}".format(d.original_version)
+                )
             else:
-                print(' ' * (2 * inner_level - 1) + '+' + str(d))
+                print(" " * (2 * inner_level - 1) + "+" + str(d))
             self._print_dependencies(d.dependencies, inner_level=inner_level + 1)

@@ -1,9 +1,9 @@
 from dogebuild import modules
 
 modules(
-    'executable',
-    'library',
+    "executable", "library",
 )
 
+
 def labla():
-    print('labla')
+    print("labla")

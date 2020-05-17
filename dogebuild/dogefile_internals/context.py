@@ -49,7 +49,7 @@ class ContextHolder:
     @phases.setter
     def phases(self, value: Dict):
         if self._phases_set:
-            raise DogeFileConfigurationError('Lifecycle already set')
+            raise DogeFileConfigurationError("Lifecycle already set")
         self._phases = value
         self._phases_set = True
 

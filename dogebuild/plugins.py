@@ -5,7 +5,7 @@ from dogebuild.dogefile_internals.context import ContextHolder
 
 
 class DogePlugin:
-    NAME = 'This is abstract doge plugin so this variable should never be used'
+    NAME = "This is abstract doge plugin so this variable should never be used"
 
     @classmethod
     def get_name(cls):
@@ -30,7 +30,9 @@ class DogePlugin:
 
     def add_dependency(self, task_name: str, dependencies: List[str]):
         task_name = self._resolve_full_task_name(task_name)
-        dependencies = list(map(lambda n: self._resolve_full_task_name(n), dependencies))
+        dependencies = list(
+            map(lambda n: self._resolve_full_task_name(n), dependencies)
+        )
 
         self.relman.add_dependency(task_name, dependencies)
 

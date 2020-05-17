@@ -42,20 +42,20 @@ class RelationManager:
 
 class TaskRelationManager:
     DEFAULT_PHASES = {
-        'clean': [],
-        'docs': [],
-        'docs-deploy': ['docs'],
-        'sources': [],
-        'resources': [],
-        'test-sources': [],
-        'test-resources': [],
-        'test': ['sources', 'resources', 'test-sources', 'test-resources'],
-        'build': ['test'],
-        'run': ['build'],
-        'integration-test': ['build'],
-        'dist': ['integration-test'],
-        'deploy': ['dist'],
-        'install': ['dist'],
+        "clean": [],
+        "docs": [],
+        "docs-deploy": ["docs"],
+        "sources": [],
+        "resources": [],
+        "test-sources": [],
+        "test-resources": [],
+        "test": ["sources", "resources", "test-sources", "test-resources"],
+        "build": ["test"],
+        "run": ["build"],
+        "integration-test": ["build"],
+        "dist": ["integration-test"],
+        "deploy": ["dist"],
+        "install": ["dist"],
     }
 
     def __init__(self, phases: Dict[str, List[str]] = None):
@@ -99,7 +99,7 @@ class TaskRelationManager:
                 if len(full_name) == 1:
                     full_names.append(full_name[0])
                 else:
-                    raise Exception('Multiple tasks with short name ' + name)
+                    raise Exception("Multiple tasks with short name " + name)
             else:
                 full_names.append(name)
 
@@ -115,11 +115,13 @@ class TaskRelationManager:
 
         for task_name in known_task_names:
             if task_name not in self._tasks.keys():
-                raise Exception("Inconsistent task graph: unknown name '{}'".format(task_name))
+                raise Exception(
+                    "Inconsistent task graph: unknown name '{}'".format(task_name)
+                )
 
     @staticmethod
     def _get_task_short_name(task_name: str) -> str:
-        split = task_name.split(':', maxsplit=2)
+        split = task_name.split(":", maxsplit=2)
         if len(split) == 2:
             return split[1]
         else:
@@ -127,7 +129,7 @@ class TaskRelationManager:
 
     @staticmethod
     def is_task_short_name(task_name: str) -> bool:
-        split = task_name.split(':', maxsplit=2)
+        split = task_name.split(":", maxsplit=2)
         return len(split) == 1
 
 

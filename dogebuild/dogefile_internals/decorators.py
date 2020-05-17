@@ -5,10 +5,16 @@ from dogebuild.dogefile_internals.context import ContextHolder
 from dogebuild.dogefile_internals.relations import TaskRelationManager
 
 
-DOGEFILE_TASK_PREFIX = 'dogefile:'
+DOGEFILE_TASK_PREFIX = "dogefile:"
 
 
-def task(task_callable: Callable = None, *, name: str = None, depends: List[str] = None, phase: str = None):
+def task(
+    task_callable: Callable = None,
+    *,
+    name: str = None,
+    depends: List[str] = None,
+    phase: str = None,
+):
     if task_callable is None:
         return lambda func: task(func, name=name, depends=depends, phase=phase)
 
@@ -35,5 +41,3 @@ def task(task_callable: Callable = None, *, name: str = None, depends: List[str]
         relman.add_dependency(phase, [task_name])
 
     return task_callable
-
-
