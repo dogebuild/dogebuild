@@ -11,9 +11,7 @@ class TestRelationManager(TestCase):
         rm.add_dependency("Tea", ["Leafs", "Water", "Lemon"])
         rm.add_dependency("Water", ["Fire"])
 
-        self.assertListEqual(
-            rm.get_dependencies_recursive(["Water"]), ["Fire", "Water"]
-        )
+        self.assertListEqual(rm.get_dependencies_recursive(["Water"]), ["Fire", "Water"])
 
         coffee_list = rm.get_dependencies_recursive(["Coffee"])
         self.assertLess(coffee_list.index("Fire"), coffee_list.index("Water"))

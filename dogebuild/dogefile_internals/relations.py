@@ -1,6 +1,6 @@
-from typing import Dict, List, Callable, Tuple
-
 from collections import OrderedDict
+from typing import Callable, Dict, List, Tuple
+
 from toposort import toposort_flatten
 
 
@@ -115,9 +115,7 @@ class TaskRelationManager:
 
         for task_name in known_task_names:
             if task_name not in self._tasks.keys():
-                raise Exception(
-                    "Inconsistent task graph: unknown name '{}'".format(task_name)
-                )
+                raise Exception("Inconsistent task graph: unknown name '{}'".format(task_name))
 
     @staticmethod
     def _get_task_short_name(task_name: str) -> str:

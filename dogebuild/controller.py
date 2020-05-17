@@ -1,6 +1,6 @@
+import argparse
 import logging
 import sys
-import argparse
 from pathlib import Path
 
 from dogebuild.common import DOGE_FILE
@@ -45,11 +45,7 @@ class DogeController:
             {
                 "version": 1,
                 "formatters": {
-                    "colored": {
-                        "()": "colorlog.ColoredFormatter",
-                        "format": console_format,
-                        "style": "{",
-                    },
+                    "colored": {"()": "colorlog.ColoredFormatter", "format": console_format, "style": "{",},
                 },
                 "handlers": {
                     "console": {

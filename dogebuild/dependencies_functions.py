@@ -2,13 +2,12 @@ import logging
 from os import path
 from typing import List, Optional
 
-from .common import DOGE_FILE
 from dogebuild.dogefile_internals.dependencies import Dependency
 
+from .common import DOGE_FILE
 
-def resolve_dependency_tree(
-    dependencies: List[Dependency], parents: List[str] = None
-) -> List[Dependency]:
+
+def resolve_dependency_tree(dependencies: List[Dependency], parents: List[str] = None) -> List[Dependency]:
     if not parents:
         parents = []
 
@@ -22,7 +21,7 @@ def resolve_dependency_tree(
             d.version = use_version
         logging.info("Acquiring {} ...".format(d))
         d.acquire_dependency()
-        deps, _ = load_doge_file(path.join(d.get_doge_file_folder(), DOGE_FILE))
+        deps, _ = load_doge_file(path.join(d.get_doge_file_folder(), DOGE_FILE))  # noqa
         d.dependencies = resolve_dependency_tree(deps, parents + [id])
     return dependencies
 

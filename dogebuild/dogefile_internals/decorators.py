@@ -1,19 +1,14 @@
-from typing import List, Callable
+from typing import Callable, List
 
 from dogebuild.common import sanitize_name
 from dogebuild.dogefile_internals.context import ContextHolder
 from dogebuild.dogefile_internals.relations import TaskRelationManager
 
-
 DOGEFILE_TASK_PREFIX = "dogefile:"
 
 
 def task(
-    task_callable: Callable = None,
-    *,
-    name: str = None,
-    depends: List[str] = None,
-    phase: str = None,
+    task_callable: Callable = None, *, name: str = None, depends: List[str] = None, phase: str = None,
 ):
     if task_callable is None:
         return lambda func: task(func, name=name, depends=depends, phase=phase)

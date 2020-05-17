@@ -1,7 +1,8 @@
-from dogebuild import make_mode, task
 from pathlib import Path
-from shutil import rmtree, copy
+from shutil import copy, rmtree
 from subprocess import run
+
+from dogebuild import make_mode, task
 
 make_mode()
 
@@ -27,15 +28,7 @@ def clean():
 def build():
     for src in sources:
         run(
-            [
-                "g++",
-                "-c",
-                "-fPIC",
-                "-o",
-                str((build_dir / src.name).with_suffix(".o")),
-                str(src),
-                f"-I{headers}",
-            ],
+            ["g++", "-c", "-fPIC", "-o", str((build_dir / src.name).with_suffix(".o")), str(src), f"-I{headers}",],
             check=True,
         )
 

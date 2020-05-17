@@ -1,6 +1,6 @@
-from typing import Dict, List
 from os import chdir, getcwd
 from pathlib import Path
+from typing import Dict, List
 
 from dogebuild.dogefile_internals.relations import TaskRelationManager
 

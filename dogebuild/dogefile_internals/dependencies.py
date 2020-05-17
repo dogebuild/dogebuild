@@ -1,9 +1,9 @@
-from typing import Tuple, Optional
-from subprocess import check_call
 import os
 from os import path
 from pathlib import Path
 from shutil import rmtree
+from subprocess import check_call
+from typing import Optional, Tuple
 
 from dogebuild.dogefile_internals.context import ContextHolder
 
@@ -48,9 +48,7 @@ class GitDependency(Dependency):
 
         if self.version.startswith(GitDependency.VERSION_TAG):
             tag = self.version[len(GitDependency.VERSION_TAG) :]
-            tag_folder = path.join(
-                GitDependency.GIT_REPO_FOLDER, self.org, self.name, "tags", tag
-            )
+            tag_folder = path.join(GitDependency.GIT_REPO_FOLDER, self.org, self.name, "tags", tag)
             if not path.exists(tag_folder):
                 os.makedirs(tag_folder)
                 check_call(["git", "clone", "-b", tag, self.url, "."], cwd=tag_folder)
@@ -58,14 +56,10 @@ class GitDependency(Dependency):
 
         elif self.version.startswith(GitDependency.VERSION_BRANCH):
             branch = self.version[len(GitDependency.VERSION_BRANCH) :]
-            branch_folder = path.join(
-                GitDependency.GIT_REPO_FOLDER, self.org, self.name, "branches", branch
-            )
+            branch_folder = path.join(GitDependency.GIT_REPO_FOLDER, self.org, self.name, "branches", branch)
             if not path.exists(branch_folder):
                 os.makedirs(branch_folder)
-                check_call(
-                    ["git", "clone", "-b", branch, self.url, "."], cwd=branch_folder
-                )
+                check_call(["git", "clone", "-b", branch, self.url, "."], cwd=branch_folder)
             else:
                 check_call(["git", "checkout", branch], cwd=branch_folder)
                 check_call(["git", "pull", "--ff-only"], cwd=branch_folder)
@@ -76,15 +70,11 @@ class GitDependency(Dependency):
     def get_doge_file_folder(self):
         if self.version.startswith(GitDependency.VERSION_TAG):
             tag = self.version[len(GitDependency.VERSION_TAG) :]
-            return path.join(
-                GitDependency.GIT_REPO_FOLDER, self.org, self.name, "tags", tag
-            )
+            return path.join(GitDependency.GIT_REPO_FOLDER, self.org, self.name, "tags", tag)
 
         elif self.version.startswith(GitDependency.VERSION_BRANCH):
             branch = self.version[len(GitDependency.VERSION_BRANCH) :]
-            return path.join(
-                GitDependency.GIT_REPO_FOLDER, self.org, self.name, "branches", branch
-            )
+            return path.join(GitDependency.GIT_REPO_FOLDER, self.org, self.name, "branches", branch)
 
         else:
             raise NotImplementedError

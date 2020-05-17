@@ -1,7 +1,8 @@
-from dogebuild import make_mode, task, dependencies, folder
 from pathlib import Path
 from shutil import rmtree
 from subprocess import run
+
+from dogebuild import dependencies, folder, make_mode, task
 
 make_mode()
 

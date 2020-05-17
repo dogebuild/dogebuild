@@ -1,15 +1,14 @@
-import os
-from dataclasses import dataclass
-from typing import List, Callable, Optional, Tuple, Dict
 import logging
 import logging.config
-from pathlib import Path
+from dataclasses import dataclass
 from inspect import signature
+from pathlib import Path
+from typing import Callable, Dict, List, Tuple
 
-from dogebuild.common import DOGE_FILE, sanitize_name, merge_dicts, DirectoryContext
-from dogebuild.dogefile_internals.dependencies import Dependency
+from dogebuild.common import DOGE_FILE, DirectoryContext, sanitize_name
 from dogebuild.dependencies_functions import resolve_dependency_tree
 from dogebuild.dogefile_internals.context import Context, ContextHolderGuard
+from dogebuild.dogefile_internals.dependencies import Dependency
 
 
 @dataclass()
@@ -44,9 +43,7 @@ class DogeFile:
             self._resolve_dependencies()
 
             run_list = self.relman.get_tasks(map(sanitize_name, tasks))
-            logging.info(
-                "Run tasks: {}".format(", ".join(map(lambda x: x[0], run_list)))
-            )
+            logging.info("Run tasks: {}".format(", ".join(map(lambda x: x[0], run_list))))
 
             for current_task in run_list:
                 self._run_task(current_task)
@@ -56,9 +53,7 @@ class DogeFile:
             logging.info(f"Resolving dependency {dependency}")
             dependency.acquire_dependency()
 
-            dependency_doge_file = DogeFile(
-                Path(dependency.get_doge_file_folder()) / DOGE_FILE
-            )
+            dependency_doge_file = DogeFile(Path(dependency.get_doge_file_folder()) / DOGE_FILE)
             dependency_doge_file.run_tasks(["build"])
 
             absolute_artifacts = {}
@@ -82,9 +77,7 @@ class DogeFile:
                 locals_values[arg] = self.artifacts.get(arg, [])
             callable_name = task[1].__name__
             exec(
-                f'RESULT = {callable_name}({", ".join(locals_values.keys())})',
-                self.code_context,
-                locals_values,
+                f'RESULT = {callable_name}({", ".join(locals_values.keys())})', self.code_context, locals_values,
             )
 
             res = locals_values.get("RESULT")
@@ -122,7 +115,7 @@ class DogeFile:
             return holder.context
 
     def dependency_tree(self) -> int:
-        deps, _ = load_doge_file(DOGE_FILE)
+        deps, _ = load_doge_file(DOGE_FILE)  # noqa
         deps = resolve_dependency_tree(deps)
         self._print_dependencies(deps)
         return 0
@@ -131,10 +124,7 @@ class DogeFile:
         for d in dependencies:
             if d.original_version:
                 print(
-                    " " * (2 * inner_level - 1)
-                    + "+"
-                    + str(d)
-                    + " conflict resolved for {}".format(d.original_version)
+                    " " * (2 * inner_level - 1) + "+" + str(d) + " conflict resolved for {}".format(d.original_version)
                 )
             else:
                 print(" " * (2 * inner_level - 1) + "+" + str(d))
