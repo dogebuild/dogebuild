@@ -1,6 +1,7 @@
-from typing import List, Dict
+from typing import List, Dict, Union
 import os
 import glob
+from pathlib import Path
 from itertools import chain
 
 
@@ -31,18 +32,17 @@ def merge_dicts(*dicts: Dict[str, List]):
     return result
 
 
-class GlobalsContext:
-    def __init__(self, context: Dict):
-        self.context = context
-        self.saved = {}
+class DirectoryContext:
+    def __init__(self, directory: Union[Path, str]):
+        if isinstance(directory, str):
+            directory = Path(directory)
+        directory = directory.resolve()
+        self.directory = directory
+        self.saved = None
 
     def __enter__(self):
-        self.saved = globals()
-        globals().clear()
-        for k, v in self.context.items():
-            globals()[k] = v
+        self.saved = os.getcwd()
+        os.chdir(self.directory)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        globals().clear()
-        for k, v in self.saved.items():
-            globals()[k] = v
+        os.chdir(self.saved)

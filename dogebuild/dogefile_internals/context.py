@@ -14,6 +14,9 @@ class Context:
         self.code_context = None
         self.modules = []
 
+    def verify(self):
+        self.relman.verify()
+
 
 class DogeFileConfigurationError(Exception):
     def __init__(self, message):

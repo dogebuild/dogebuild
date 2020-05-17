@@ -4,7 +4,6 @@ from typing import List, Optional
 
 from .common import DOGE_FILE
 from dogebuild.dogefile_internals.dependencies import Dependency
-from .dogefile_loader import load_doge_file
 
 
 def resolve_dependency_tree(dependencies: List[Dependency], parents: List[str] = None) -> List[Dependency]:
