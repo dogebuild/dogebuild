@@ -1,11 +1,19 @@
 import argparse
 import logging
 import logging.config
+import pkg_resources
 import sys
 from pathlib import Path
+from encodings import utf_8
 
 from dogebuild.common import DOGE_FILE
 from dogebuild.doge import DogeFile, DogeFileFactory
+
+
+def _load_version():
+    version = pkg_resources.resource_string('dogebuild', 'dogebuild.version')
+    version = version.decode(utf_8.getregentry().name).strip()
+    return version
 
 
 class DogeController:
@@ -23,7 +31,8 @@ class DogeController:
     @staticmethod
     def _parse_args(args) -> argparse.Namespace:
         main_parser = argparse.ArgumentParser(prog="doge", description="")
-        main_parser.add_argument("--file", default=DOGE_FILE, type=Path)
+        main_parser.add_argument("--version", "-V", action="version", version=_load_version())
+        main_parser.add_argument("--file", "-f", default=DOGE_FILE, type=Path)
         main_parser.add_argument("command", nargs=1)
         main_parser.add_argument("options", nargs=argparse.REMAINDER)
 
