@@ -6,6 +6,7 @@ from subprocess import check_call
 from typing import Optional, Tuple
 
 from dogebuild.dogefile_internals.context import ContextHolder
+from dogebuild.common import DOGE_FILE
 
 
 class Dependency:
@@ -24,6 +25,9 @@ class Dependency:
 
     def acquire_dependency(self):
         raise NotImplementedError()
+
+    def get_doge_file(self) -> Optional[Path]:
+        return None
 
 
 class GitDependency(Dependency):
@@ -67,14 +71,14 @@ class GitDependency(Dependency):
         else:
             raise NotImplementedError
 
-    def get_doge_file_folder(self):
+    def get_doge_file(self) -> Optional[Path]:
         if self.version.startswith(GitDependency.VERSION_TAG):
-            tag = self.version[len(GitDependency.VERSION_TAG) :]
-            return path.join(GitDependency.GIT_REPO_FOLDER, self.org, self.name, "tags", tag)
+            tag = self.version[len(GitDependency.VERSION_TAG):]
+            return Path(GitDependency.GIT_REPO_FOLDER) / self.org / self.name / "tags" / tag / DOGE_FILE
 
         elif self.version.startswith(GitDependency.VERSION_BRANCH):
             branch = self.version[len(GitDependency.VERSION_BRANCH) :]
-            return path.join(GitDependency.GIT_REPO_FOLDER, self.org, self.name, "branches", branch)
+            return Path(GitDependency.GIT_REPO_FOLDER) / self.org / self.name / "branches" / branch / DOGE_FILE
 
         else:
             raise NotImplementedError
@@ -98,8 +102,8 @@ class FolderDependency(Dependency):
     def acquire_dependency(self):
         pass
 
-    def get_doge_file_folder(self) -> Path:
-        return self.folder
+    def get_doge_file(self) -> Optional[Path]:
+        return self.folder / DOGE_FILE
 
     def get_id(self) -> Tuple[str, Optional[str]]:
         return str(self.folder), None

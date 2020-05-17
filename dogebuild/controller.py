@@ -1,10 +1,11 @@
 import argparse
 import logging
+import logging.config
 import sys
 from pathlib import Path
 
 from dogebuild.common import DOGE_FILE
-from dogebuild.doge import DogeFile
+from dogebuild.doge import DogeFile, DogeFileFactory
 
 
 class DogeController:
@@ -14,7 +15,7 @@ class DogeController:
     def __init__(self, args):
         self.args = self._parse_args(args)
         self._config_logging()
-        self.doge = DogeFile(self.args.file)
+        self.doge = DogeFileFactory(Path()).create(self.args.file)
 
     def run(self) -> int:
         return self.args.command(self.doge, self.args.options)
@@ -38,7 +39,7 @@ class DogeController:
 
     @staticmethod
     def _config_logging():
-        console_format = "{log_color}{name}: {message}{reset}"
+        console_format = "{log_color}{message}{reset}"
         console_level = "DEBUG"
 
         logging.config.dictConfig(
