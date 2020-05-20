@@ -2,12 +2,13 @@ from os import chdir, getcwd
 from pathlib import Path
 from typing import Dict, List
 
+from dogebuild.dogefile_internals.errors import DogeFileConfigurationError
 from dogebuild.dogefile_internals.relations import TaskRelationManager
 
 
 class Context:
-    def __init__(self, phases: Dict[str, List[str]] = None):
-        self.relman = TaskRelationManager(phases)
+    def __init__(self, doge_file_id: str, phases: Dict[str, List[str]] = None):
+        self.relman = TaskRelationManager(doge_file_id, phases)
         self.plugins = []
         self.dependencies = []
         self.test_dependencies = []
@@ -18,15 +19,11 @@ class Context:
         self.relman.verify()
 
 
-class DogeFileConfigurationError(Exception):
-    def __init__(self, message):
-        self.message = message
-
-
 class ContextHolder:
     INSTANCE = None
 
-    def __init__(self):
+    def __init__(self, doge_file_id: str):
+        self._doge_file_id = doge_file_id
         self._context = None
         self._phases = {}
         self._phases_set = False
@@ -39,7 +36,7 @@ class ContextHolder:
     @context.getter
     def context(self):
         if not self._context:
-            self._context = Context(self._phases)
+            self._context = Context(self._doge_file_id, self._phases)
         return self._context
 
     @property
@@ -63,8 +60,8 @@ class ContextHolder:
 
 
 class ContextHolderGuard:
-    def __init__(self, dogefile: Path):
-        self.holder = ContextHolder()
+    def __init__(self, dogefile: Path, doge_file_id: str):
+        self.holder = ContextHolder(doge_file_id)
         self.dogefile = dogefile
         self.cwd = None
 

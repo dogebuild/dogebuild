@@ -36,3 +36,27 @@ class DogePlugin:
 
     def _resolve_full_task_name(self, task_name: str):
         return self.__class__.get_name() + ":" + task_name
+
+
+class StubPlugin(DogePlugin):
+    """
+    Stub plugin for integration test
+    """
+    NAME = "Stub plugin"
+
+    def __init__(self, **kwargs):
+        super(StubPlugin, self).__init__(**kwargs)
+
+    def task_1(self):
+        pass
+
+    def task_2(self):
+        pass
+
+    def task_3(self):
+        pass
+
+    def task_4(self):
+        pass
+
+

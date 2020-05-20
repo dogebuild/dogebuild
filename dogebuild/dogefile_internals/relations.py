@@ -1,7 +1,9 @@
 from collections import OrderedDict
-from typing import Callable, Dict, List, Tuple
+from typing import Callable, Dict, List, Tuple, Optional
 
 from toposort import toposort_flatten
+
+from dogebuild.dogefile_internals.errors import DogeFileConfigurationError
 
 
 class RelationManager:
@@ -58,58 +60,74 @@ class TaskRelationManager:
         "install": ["dist"],
     }
 
-    def __init__(self, phases: Dict[str, List[str]] = None):
-        self._relation_manager = RelationManager()
-        self._tasks = dict()
-        self._tasks_short_names = dict()
-
+    def __init__(self, doge_file_id: str, phases=None):
         if phases is None:
             phases = TaskRelationManager.DEFAULT_PHASES
-        self._phases = phases
 
-        for task, dependencies in self._phases.items():
-            self.add_task(task, _skip)
-            self.add_dependency(task, dependencies)
+        self._doge_file_id = doge_file_id
+        self._relation_manager = RelationManager()
+        self._phases = phases
+        self._tasks = dict()
+        self._tasks_aliases = dict()
+
+        for phase_name, dependencies in self._phases.items():
+            self._tasks[phase_name] = _skip
+            self.add_dependency(phase_name, dependencies)
 
         self.verify()
 
-    def add_task(self, task_name: str, task: Callable):
-        self._tasks[task_name] = task
-        self._relation_manager.add_dependency(task_name, [])
+    def add_task(self, task: Callable, aliases: str = None, plugin_name: str = None, dependencies: List[str] = None):
+        if aliases is None:
+            aliases = []
+        if dependencies is None:
+            dependencies = []
 
-        short_name = TaskRelationManager._get_task_short_name(task_name)
-        if short_name in self._phases.keys():
-            return
-        if short_name in self._tasks_short_names:
-            self._tasks_short_names[short_name].append(task_name)
-        else:
-            self._tasks_short_names[short_name] = [task_name]
+        task_aliases = self._build_task_aliases(task.__name__, aliases, plugin_name)
+        canonical_task_name = task_aliases[0]
 
-    def add_dependency(self, dependant: str, dependencies: List[str]):
-        self._relation_manager.add_dependency(dependant, dependencies)
+        self._tasks[canonical_task_name] = task
+        for alias in task_aliases:
+            if alias in self._phases:
+                # Tasks with phase name are not allowed
+                continue
+            if alias not in self._tasks_aliases:
+                self._tasks_aliases[alias] = canonical_task_name
+            else:
+                if isinstance(self._tasks_aliases[alias], DuplicateAlias):
+                    self._tasks_aliases[alias].duplicates.add(alias)
+                else:
+                    self._tasks_aliases[alias] = DuplicateAlias([self._tasks_aliases[alias], alias])
 
-    def get_dependencies(self, dependant: str) -> List[str]:
-        return self._relation_manager.get_dependencies(dependant)
+        self._relation_manager.add_dependency(canonical_task_name, dependencies)
+
+    def add_dependency(self, canonical_task_name: str, dependencies: List[str]):
+        self._relation_manager.add_dependency(canonical_task_name, dependencies)
+
+    def get_dependencies(self, canonical_task_name: str) -> List[str]:
+        return self._relation_manager.get_dependencies(canonical_task_name)
 
     def get_tasks(self, task_names: List[str]) -> List[Tuple[str, Callable]]:
-        full_names = []
-        for name in task_names:
-            if name in self._tasks_short_names:
-                full_name = self._tasks_short_names[name]
-                if len(full_name) == 1:
-                    full_names.append(full_name[0])
-                else:
-                    raise Exception("Multiple tasks with short name " + name)
-            else:
-                full_names.append(name)
+        canonical_task_names = []
+        unknown_tasks = []
 
-        task_names = self._relation_manager.get_dependencies_recursive(full_names)
-        return list(map(lambda name: (name, self._tasks[name]), task_names))
+        for name in task_names:
+            if name in self._tasks_aliases:
+                canonical_task_names.append(self._tasks_aliases[name])
+            else:
+                unknown_tasks.append(name)
+
+        if unknown_tasks:
+            raise Exception(f"Unknown tasks: {unknown_tasks}")
+
+        sorted_dependencies = self._relation_manager.get_dependencies_recursive(canonical_task_names)
+        return list(map(lambda canonical_name: (canonical_name, self._tasks[canonical_name]), sorted_dependencies))
 
     def verify(self):
         known_task_names = set()
         for key in self._relation_manager._edges.keys():
             known_task_names.add(key)
+            self._relation_manager._edges[key] = set(map(lambda x: self._tasks_aliases[x], self._relation_manager._edges[key]))
+
             for dep in self._relation_manager._edges[key]:
                 known_task_names.add(dep)
 
@@ -117,19 +135,28 @@ class TaskRelationManager:
             if task_name not in self._tasks.keys():
                 raise Exception("Inconsistent task graph: unknown name '{}'".format(task_name))
 
-    @staticmethod
-    def _get_task_short_name(task_name: str) -> str:
-        split = task_name.split(":", maxsplit=2)
-        if len(split) == 2:
-            return split[1]
-        else:
-            return task_name
-
-    @staticmethod
-    def is_task_short_name(task_name: str) -> bool:
-        split = task_name.split(":", maxsplit=2)
-        return len(split) == 1
+    def _build_task_aliases(self, callable_name: str, aliases: List[str], plugin_name: Optional[str]) -> List[str]:
+        short_names = [callable_name] + aliases
+        result = []
+        for short_name in short_names:
+            if plugin_name is None:
+                result.extend([
+                    f"{self._doge_file_id}:{short_name}",
+                    short_name,
+                ])
+            else:
+                result.extend([
+                    f"{self._doge_file_id}:{plugin_name}:{short_name}",
+                    f"{plugin_name}:{short_name}",
+                    short_name,
+                ])
+        return result
 
 
 def _skip():
     return 0, {}
+
+
+class DuplicateAlias:
+    def __init__(self, duplicates):
+        self.duplicates = duplicates

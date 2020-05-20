@@ -6,7 +6,7 @@ from subprocess import check_call
 from typing import Optional, Tuple
 
 from dogebuild.dogefile_internals.context import ContextHolder
-from dogebuild.common import DOGE_FILE
+from dogebuild.common import DOGE_FILE, DOGE_MODULES_DIRECTORY
 
 
 class Dependency:
@@ -31,7 +31,7 @@ class Dependency:
 
 
 class GitDependency(Dependency):
-    GIT_REPO_FOLDER = path.expanduser(path.join("~", ".doge", "repo", "git"))
+    GIT_REPO_FOLDER = Path(DOGE_MODULES_DIRECTORY) / "git"
 
     VERSION_TAG = "tag:"
     VERSION_BRANCH = "branch:"

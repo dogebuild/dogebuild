@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Dict, List, Union
 
 DOGE_FILE = "dogefile.py"
+DOGE_MODULES_DIRECTORY = ".doge_modules"
 
 
 def files(base_dir: str, include: List[str], exclude: List[str] = None):

@@ -46,7 +46,7 @@ class DogeFile:
         self.directory = self.doge_file.parent
         self.doge_file_id = doge_file_id
 
-        context = DogeFile._load_doge_file(self.doge_file)
+        context = DogeFile._load_doge_file(self.doge_file, doge_file_id)
 
         self.dependencies = context.dependencies
         self.test_dependencies = context.test_dependencies
@@ -135,8 +135,8 @@ class DogeFile:
                 self.artifacts[type] = artifacts
 
     @staticmethod
-    def _load_doge_file(doge_file: Path) -> Context:
-        with open(doge_file, "r") as file, ContextHolderGuard(doge_file) as holder:
+    def _load_doge_file(doge_file: Path, doge_file_id: str) -> Context:
+        with open(doge_file, "r") as file, ContextHolderGuard(doge_file, doge_file_id) as holder:
             code = compile(file.read(), doge_file.name, "exec")
             exec(code, holder.globals_context)
             holder.context.verify()
