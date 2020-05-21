@@ -48,7 +48,7 @@ class RelationManager:
 class TaskResult:
     exit_code: int
     artifacts: Dict
-    error: Exception
+    error: Optional[Exception]
 
 
 class Task:
@@ -90,9 +90,29 @@ class PhaseTask(Task):
 
 
 class PluginTask(Task):
+    def __init__(self, canonical_name: str, method: Callable, plugin_instance: 'DogePlugin'):
+        super(PluginTask, self).__init__(canonical_name)
+        self.method = method
+        self.plugin_instance = plugin_instance
 
     def run(self, artifacts: Dict, code_context: Dict):
-        pass
+        try:
+            sig = signature(self.method)
+            locals_values = {
+                'PLUGIN_INSTANCE': self.plugin_instance
+            }
+            arguments = {}
+            for arg in sig.parameters:
+                locals_values[arg] = artifacts.get(arg, [])
+                arguments[arg] = artifacts.get(arg, [])
+            method_name = self.method.__name__
+            exec(f'RESULT = PLUGIN_INSTANCE.{method_name}({", ".join(arguments.keys())})', code_context, locals_values)
+            res = locals_values.get("RESULT")
+            if res is None:
+                res = (0, {})
+            return TaskResult(res[0], res[1], None)
+        except Exception as e:
+            return TaskResult(1, {}, e)
 
 
 class TaskRelationManager:
@@ -130,7 +150,7 @@ class TaskRelationManager:
 
         self.verify()
 
-    def add_task(self, task: Callable, *, aliases: str = None, plugin_name: str = None, dependencies: List[str] = None, phase: str = None):
+    def add_task(self, task: Callable, *, aliases: str = None, plugin_name: str = None, dependencies: List[str] = None, phase: str = None, plugin_instance: 'DogePlugin' = None):
         if aliases is None:
             aliases = []
         if dependencies is None:
@@ -139,7 +159,10 @@ class TaskRelationManager:
         task_aliases = self._build_task_aliases(task.__name__, aliases, plugin_name)
         canonical_task_name = task_aliases[0]
 
-        self._tasks[canonical_task_name] = FunctionTask(canonical_task_name, task)
+        if plugin_instance is None:
+            self._tasks[canonical_task_name] = FunctionTask(canonical_task_name, task)
+        else:
+            self._tasks[canonical_task_name] = PluginTask(canonical_task_name, task, plugin_instance)
         for alias in task_aliases:
             if alias in self._phases:
                 # Tasks with phase name are not allowed

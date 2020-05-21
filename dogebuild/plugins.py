@@ -21,7 +21,7 @@ class DogePlugin:
         self.test_dependencies = ContextHolder.INSTANCE.context.test_dependencies
 
     def add_task(self, task_callable: Callable = None, *, aliases: List[str] = None, depends: List[str] = None, phase: str = None,):
-        self.relman.add_task(task_callable, aliases=aliases, dependencies=depends, plugin_name=self.NAME, phase=phase)
+        self.relman.add_task(task_callable, aliases=aliases, dependencies=depends, plugin_name=self.NAME, phase=phase, plugin_instance=self)
 
     def add_dependency(self, task_name: str, dependencies: List[str]):
         task_name = self._resolve_full_task_name(task_name)
