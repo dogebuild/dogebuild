@@ -25,7 +25,7 @@ class ContextHolder:
     def __init__(self, doge_file_id: str):
         self._doge_file_id = doge_file_id
         self._context = None
-        self._phases = {}
+        self._phases = None
         self._phases_set = False
         self._globals_context = {}
 

@@ -19,6 +19,6 @@ def task(
         depends = []
 
     relman = ContextHolder.INSTANCE.context.relman
-    relman.add_task(task_callable, aliases, plugin_name=DOGEFILE_TASK_PREFIX, dependencies=depends)
+    relman.add_task(task_callable, aliases=aliases, plugin_name=DOGEFILE_TASK_PREFIX, dependencies=depends)
 
     return task_callable

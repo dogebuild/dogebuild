@@ -1,4 +1,6 @@
 from collections import OrderedDict
+from dataclasses import dataclass
+from inspect import signature
 from typing import Callable, Dict, List, Tuple, Optional
 
 from toposort import toposort_flatten
@@ -42,6 +44,57 @@ class RelationManager:
         return list(result.keys())
 
 
+@dataclass()
+class TaskResult:
+    exit_code: int
+    artifacts: Dict
+    error: Exception
+
+
+class Task:
+    TASK_TYPE = 'Task'
+
+    def __init__(self, canonical_name: str):
+        self.canonical_name = canonical_name
+
+    def run(self, artifacts: Dict, code_context: Dict) -> TaskResult:
+        raise NotImplementedError()
+
+
+class FunctionTask(Task):
+    def __init__(self, canonical_name: str,  function: Callable):
+        super(FunctionTask, self).__init__(canonical_name)
+        self.function = function
+
+    def run(self, artifacts: Dict, code_context: Dict):
+        try:
+            sig = signature(self.function)
+            locals_values = {}
+            for arg in sig.parameters:
+                locals_values[arg] = artifacts.get(arg, [])
+            callable_name = self.function.__name__
+            exec(f'RESULT = {callable_name}({", ".join(locals_values.keys())})', code_context, locals_values)
+            res = locals_values.get("RESULT")
+            if res is None:
+                res = (0, {})
+            return TaskResult(res[0], res[1], None)
+        except Exception as e:
+            return TaskResult(1, {}, e)
+
+
+class PhaseTask(Task):
+    TASK_TYPE = 'Phase'
+
+    def run(self, artifacts: Dict, code_context: Dict) -> TaskResult:
+        return TaskResult(0, {}, None)
+
+
+class PluginTask(Task):
+
+    def run(self, artifacts: Dict, code_context: Dict):
+        pass
+
+
 class TaskRelationManager:
     DEFAULT_PHASES = {
         "clean": [],
@@ -71,12 +124,13 @@ class TaskRelationManager:
         self._tasks_aliases = dict()
 
         for phase_name, dependencies in self._phases.items():
-            self._tasks[phase_name] = _skip
+            self._tasks[phase_name] = PhaseTask(phase_name)
+            self._tasks_aliases[phase_name] = phase_name
             self.add_dependency(phase_name, dependencies)
 
         self.verify()
 
-    def add_task(self, task: Callable, aliases: str = None, plugin_name: str = None, dependencies: List[str] = None):
+    def add_task(self, task: Callable, *, aliases: str = None, plugin_name: str = None, dependencies: List[str] = None, phase: str = None):
         if aliases is None:
             aliases = []
         if dependencies is None:
@@ -85,7 +139,7 @@ class TaskRelationManager:
         task_aliases = self._build_task_aliases(task.__name__, aliases, plugin_name)
         canonical_task_name = task_aliases[0]
 
-        self._tasks[canonical_task_name] = task
+        self._tasks[canonical_task_name] = FunctionTask(canonical_task_name, task)
         for alias in task_aliases:
             if alias in self._phases:
                 # Tasks with phase name are not allowed
@@ -99,6 +153,8 @@ class TaskRelationManager:
                     self._tasks_aliases[alias] = DuplicateAlias([self._tasks_aliases[alias], alias])
 
         self._relation_manager.add_dependency(canonical_task_name, dependencies)
+        if phase:
+            self._relation_manager.add_dependency(phase, [canonical_task_name])
 
     def add_dependency(self, canonical_task_name: str, dependencies: List[str]):
         self._relation_manager.add_dependency(canonical_task_name, dependencies)
@@ -106,7 +162,7 @@ class TaskRelationManager:
     def get_dependencies(self, canonical_task_name: str) -> List[str]:
         return self._relation_manager.get_dependencies(canonical_task_name)
 
-    def get_tasks(self, task_names: List[str]) -> List[Tuple[str, Callable]]:
+    def get_tasks(self, task_names: List[str]) -> List[Task]:
         canonical_task_names = []
         unknown_tasks = []
 
@@ -120,7 +176,7 @@ class TaskRelationManager:
             raise Exception(f"Unknown tasks: {unknown_tasks}")
 
         sorted_dependencies = self._relation_manager.get_dependencies_recursive(canonical_task_names)
-        return list(map(lambda canonical_name: (canonical_name, self._tasks[canonical_name]), sorted_dependencies))
+        return list(map(lambda canonical_name: self._tasks[canonical_name], sorted_dependencies))
 
     def verify(self):
         known_task_names = set()
@@ -151,10 +207,6 @@ class TaskRelationManager:
                     short_name,
                 ])
         return result
-
-
-def _skip():
-    return 0, {}
 
 
 class DuplicateAlias:

@@ -1,5 +1,4 @@
 import logging
-from dataclasses import dataclass
 from inspect import signature
 from pathlib import Path
 from os.path import relpath
@@ -9,13 +8,6 @@ from dogebuild.common import DOGE_FILE, DirectoryContext, sanitize_name
 from dogebuild.dependencies_functions import resolve_dependency_tree
 from dogebuild.dogefile_internals.context import Context, ContextHolderGuard
 from dogebuild.dogefile_internals.dependencies import Dependency
-
-
-@dataclass()
-class TaskResult:
-    exit_code: int
-    artifacts: Dict
-    error: Exception
 
 
 class DogeFileLoggerAdapter(logging.LoggerAdapter):
@@ -69,10 +61,23 @@ class DogeFile:
             self._resolve_dependencies()
 
             run_list = self.relman.get_tasks(map(sanitize_name, tasks))
-            self.logger.info("Run tasks: {}".format(", ".join(map(lambda x: x[0], run_list))))
+            self.logger.info("Run tasks: {}".format(", ".join(map(lambda task: task.canonical_name, run_list))))
 
             for current_task in run_list:
-                self._run_task(current_task)
+                if current_task.canonical_name in self.processed_tasks:
+                    continue
+
+                result = current_task.run(self.artifacts, self.code_context)
+                if result.error is not None:
+                    self.logger.error(f"{current_task.TASK_TYPE} {current_task.canonical_name} failed")
+                    self.logger.exception(result.error)
+                elif result.exit_code != 0:
+                    self.logger.error(f"{current_task.TASK_TYPE} {current_task.canonical_name} failed")
+                else:
+                    self._add_artifacts(result.artifacts)
+                    self.logger.debug(f"{current_task.TASK_TYPE} {current_task.canonical_name} successfully terminated")
+
+                self.processed_tasks[current_task.canonical_name] = result
 
     def _resolve_dependencies(self):
         for dependency in self.dependencies + self.test_dependencies:
@@ -90,42 +95,6 @@ class DogeFile:
                     absolute_artifacts[k] = list(map(lambda d: dff / d, v))
 
                 self._add_artifacts(absolute_artifacts)
-
-    def _run_task(self, task: Tuple[str, Callable]) -> TaskResult:
-        task_name = task[0]
-        task_callable = task[1]
-        sig = signature(task_callable)
-
-        if task_name in self.processed_tasks:
-            return self.processed_tasks[task_name]
-
-        try:
-            locals_values = {}
-            for arg in sig.parameters:
-                locals_values[arg] = self.artifacts.get(arg, [])
-            callable_name = task[1].__name__
-            exec(
-                f'RESULT = {callable_name}({", ".join(locals_values.keys())})', self.code_context, locals_values,
-            )
-
-            res = locals_values.get("RESULT")
-            if res is None:
-                res = (0, {})
-            res = (*res, None)
-        except Exception as e:
-            self.logger.exception(e)
-            res = (1, {}, e)
-
-        exit_code, artifacts, error = res
-        if not exit_code:
-            self._add_artifacts(artifacts)
-            self.logger.debug(f"Task {task_name} successfully terminated")
-        else:
-            self.logger.error(f"Task {task_name} failed")
-
-        task_result = TaskResult(exit_code, artifacts, error)
-        self.processed_tasks[task_name] = task_result
-        return task_result
 
     def _add_artifacts(self, add: Dict[str, List]) -> None:
         for type, artifacts in add.items():
