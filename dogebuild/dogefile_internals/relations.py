@@ -48,7 +48,7 @@ class RelationManager:
 class TaskResult:
     exit_code: int
     artifacts: Dict
-    error: Optional[Exception]
+    error: Exception
 
 
 class Task:

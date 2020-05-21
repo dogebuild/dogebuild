@@ -69,8 +69,7 @@ class DogeFile:
 
                 result = current_task.run(self.artifacts, self.code_context)
                 if result.error is not None:
-                    self.logger.error(f"{current_task.TASK_TYPE} {current_task.canonical_name} failed")
-                    self.logger.exception(result.error)
+                    self.logger.exception(f"{current_task.TASK_TYPE} {current_task.canonical_name} failed", exc_info=result.error)
                 elif result.exit_code != 0:
                     self.logger.error(f"{current_task.TASK_TYPE} {current_task.canonical_name} failed")
                 else:

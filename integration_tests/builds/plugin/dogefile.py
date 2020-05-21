@@ -16,6 +16,7 @@ class TestPlugin(DogePlugin):
 
     def task_4(self):
         print('task_4')
+        raise Exception('Boo')
 
     def __init__(self):
         super(TestPlugin, self).__init__()
