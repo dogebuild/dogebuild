@@ -52,7 +52,7 @@ class TaskResult:
 
 
 class Task:
-    TASK_TYPE = 'Task'
+    TASK_TYPE = "Task"
 
     def __init__(self, canonical_name: str):
         self.canonical_name = canonical_name
@@ -62,7 +62,7 @@ class Task:
 
 
 class FunctionTask(Task):
-    def __init__(self, canonical_name: str,  function: Callable):
+    def __init__(self, canonical_name: str, function: Callable):
         super(FunctionTask, self).__init__(canonical_name)
         self.function = function
 
@@ -83,14 +83,14 @@ class FunctionTask(Task):
 
 
 class PhaseTask(Task):
-    TASK_TYPE = 'Phase'
+    TASK_TYPE = "Phase"
 
     def run(self, artifacts: Dict, code_context: Dict) -> TaskResult:
         return TaskResult(0, {}, None)
 
 
 class PluginTask(Task):
-    def __init__(self, canonical_name: str, method: Callable, plugin_instance: 'DogePlugin'):
+    def __init__(self, canonical_name: str, method: Callable, plugin_instance: "DogePlugin"):
         super(PluginTask, self).__init__(canonical_name)
         self.method = method
         self.plugin_instance = plugin_instance
@@ -98,9 +98,7 @@ class PluginTask(Task):
     def run(self, artifacts: Dict, code_context: Dict):
         try:
             sig = signature(self.method)
-            locals_values = {
-                'PLUGIN_INSTANCE': self.plugin_instance
-            }
+            locals_values = {"PLUGIN_INSTANCE": self.plugin_instance}
             arguments = {}
             for arg in sig.parameters:
                 locals_values[arg] = artifacts.get(arg, [])
@@ -150,7 +148,16 @@ class TaskRelationManager:
 
         self.verify()
 
-    def add_task(self, task: Callable, *, aliases: str = None, plugin_name: str = None, dependencies: List[str] = None, phase: str = None, plugin_instance: 'DogePlugin' = None):
+    def add_task(
+        self,
+        task: Callable,
+        *,
+        aliases: str = None,
+        plugin_name: str = None,
+        dependencies: List[str] = None,
+        phase: str = None,
+        plugin_instance: "DogePlugin" = None,
+    ):
         if aliases is None:
             aliases = []
         if dependencies is None:
@@ -205,7 +212,9 @@ class TaskRelationManager:
         known_task_names = set()
         for key in self._relation_manager._edges.keys():
             known_task_names.add(key)
-            self._relation_manager._edges[key] = set(map(lambda x: self._tasks_aliases[x], self._relation_manager._edges[key]))
+            self._relation_manager._edges[key] = set(
+                map(lambda x: self._tasks_aliases[x], self._relation_manager._edges[key])
+            )
 
             for dep in self._relation_manager._edges[key]:
                 known_task_names.add(dep)
@@ -219,16 +228,13 @@ class TaskRelationManager:
         result = []
         for short_name in short_names:
             if plugin_name is None:
-                result.extend([
-                    f"{self._doge_file_id}:{short_name}",
-                    short_name,
-                ])
+                result.extend(
+                    [f"{self._doge_file_id}:{short_name}", short_name,]
+                )
             else:
-                result.extend([
-                    f"{self._doge_file_id}:{plugin_name}:{short_name}",
-                    f"{plugin_name}:{short_name}",
-                    short_name,
-                ])
+                result.extend(
+                    [f"{self._doge_file_id}:{plugin_name}:{short_name}", f"{plugin_name}:{short_name}", short_name,]
+                )
         return result
 
 

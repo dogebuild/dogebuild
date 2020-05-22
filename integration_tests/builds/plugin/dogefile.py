@@ -6,29 +6,29 @@ class TestPlugin(DogePlugin):
     NAME = "test-plugin"
 
     def task_1(self):
-        print('task_1')
+        print("task_1")
 
     def task_2(self):
-        print('task_2')
+        print("task_2")
 
     def task_3(self):
-        print('task_3')
+        print("task_3")
 
     def task_4(self):
-        print('task_4')
+        print("task_4")
 
     def __init__(self):
         super(TestPlugin, self).__init__()
 
         self.add_task(self.task_1)
-        self.add_task(self.task_2, depends=['task_1'])
-        self.add_task(self.task_3, depends=['task_1'])
-        self.add_task(self.task_4, depends=['task_3', 'task_2'], phase='build')
+        self.add_task(self.task_2, depends=["task_1"])
+        self.add_task(self.task_3, depends=["task_1"])
+        self.add_task(self.task_4, depends=["task_3", "task_2"], phase="build")
 
 
 TestPlugin()
 
 
-@task(phase='build', depends=['task_4'])
+@task(phase="build", depends=["task_4"])
 def task_5():
-    print('task_5')
+    print("task_5")

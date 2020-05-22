@@ -20,6 +20,6 @@ def task3():
     print("task3")
 
 
-@task(depends=["Task 3 verbose name"], aliases=['build'])
+@task(depends=["Task 3 verbose name"], aliases=["build"])
 def task4():
     print("task4")

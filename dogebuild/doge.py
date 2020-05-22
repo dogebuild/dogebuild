@@ -11,7 +11,7 @@ from dogebuild.dogefile_internals.dependencies import Dependency
 
 class DogeFileLoggerAdapter(logging.LoggerAdapter):
     def __init__(self, logger, doge_file_id: str):
-        extra = {'doge_file_id': doge_file_id}
+        extra = {"doge_file_id": doge_file_id}
         super(DogeFileLoggerAdapter, self).__init__(logger, extra)
         self.doge_file_id = doge_file_id
 
@@ -24,7 +24,7 @@ class DogeFileFactory:
         self.store = {}
         self.root_path = root_path.resolve()
 
-    def create(self, doge_file: Path) -> 'DogeFile':
+    def create(self, doge_file: Path) -> "DogeFile":
         doge_file = doge_file.resolve()
         if doge_file not in self.store:
             self.store[doge_file] = DogeFile(doge_file, relpath(doge_file.parent, self.root_path), self)
@@ -68,7 +68,9 @@ class DogeFile:
 
                 result = current_task.run(self.artifacts, self.code_context)
                 if result.error is not None:
-                    self.logger.exception(f"{current_task.TASK_TYPE} {current_task.canonical_name} failed", exc_info=result.error)
+                    self.logger.exception(
+                        f"{current_task.TASK_TYPE} {current_task.canonical_name} failed", exc_info=result.error
+                    )
                 elif result.exit_code != 0:
                     self.logger.error(f"{current_task.TASK_TYPE} {current_task.canonical_name} failed")
                 else:

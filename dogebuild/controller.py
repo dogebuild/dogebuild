@@ -11,7 +11,7 @@ from dogebuild.doge import DogeFile, DogeFileFactory
 
 
 def _load_version():
-    version = pkg_resources.resource_string('dogebuild', 'dogebuild.version')
+    version = pkg_resources.resource_string("dogebuild", "dogebuild.version")
     version = version.decode(utf_8.getregentry().name).strip()
     return version
 

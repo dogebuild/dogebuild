@@ -73,7 +73,7 @@ class GitDependency(Dependency):
 
     def get_doge_file(self) -> Optional[Path]:
         if self.version.startswith(GitDependency.VERSION_TAG):
-            tag = self.version[len(GitDependency.VERSION_TAG):]
+            tag = self.version[len(GitDependency.VERSION_TAG) :]
             return Path(GitDependency.GIT_REPO_FOLDER) / self.org / self.name / "tags" / tag / DOGE_FILE
 
         elif self.version.startswith(GitDependency.VERSION_BRANCH):
