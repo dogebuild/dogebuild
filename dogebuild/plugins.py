@@ -20,38 +20,5 @@ class DogePlugin:
         self.dependencies = ContextHolder.INSTANCE.context.dependencies
         self.test_dependencies = ContextHolder.INSTANCE.context.test_dependencies
 
-    def add_task(self, task_callable: Callable = None, *, aliases: List[str] = None, depends: List[str] = None, phase: str = None,):
+    def add_task(self, task_callable: Callable, *, aliases: List[str] = None, depends: List[str] = None, phase: str = None):
         self.relman.add_task(task_callable, aliases=aliases, dependencies=depends, plugin_name=self.NAME, phase=phase, plugin_instance=self)
-
-    def add_dependency(self, task_name: str, dependencies: List[str]):
-        task_name = self._resolve_full_task_name(task_name)
-        dependencies = list(map(lambda n: self._resolve_full_task_name(n), dependencies))
-
-        self.relman.add_dependency(task_name, dependencies)
-
-    def _resolve_full_task_name(self, task_name: str):
-        return self.__class__.get_name() + ":" + task_name
-
-
-class StubPlugin(DogePlugin):
-    """
-    Stub plugin for integration test
-    """
-    NAME = "Stub plugin"
-
-    def __init__(self, **kwargs):
-        super(StubPlugin, self).__init__(**kwargs)
-
-    def task_1(self):
-        pass
-
-    def task_2(self):
-        pass
-
-    def task_3(self):
-        pass
-
-    def task_4(self):
-        pass
-
-

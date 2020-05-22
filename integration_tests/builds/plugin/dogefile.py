@@ -16,7 +16,6 @@ class TestPlugin(DogePlugin):
 
     def task_4(self):
         print('task_4')
-        raise Exception('Boo')
 
     def __init__(self):
         super(TestPlugin, self).__init__()
@@ -27,6 +26,9 @@ class TestPlugin(DogePlugin):
         self.add_task(self.task_4, depends=['task_3', 'task_2'], phase='build')
 
 
-
-
 TestPlugin()
+
+
+@task(phase='build', depends=['task_4'])
+def task_5():
+    print('task_5')
