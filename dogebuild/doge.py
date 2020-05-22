@@ -1,8 +1,7 @@
 import logging
-from inspect import signature
 from pathlib import Path
 from os.path import relpath
-from typing import Callable, Dict, List, Tuple
+from typing import Dict, List
 
 from dogebuild.common import DOGE_FILE, DirectoryContext, sanitize_name
 from dogebuild.dependencies_functions import resolve_dependency_tree
@@ -125,5 +124,3 @@ class DogeFile:
             else:
                 print(" " * (2 * inner_level - 1) + "+" + str(d))
             self._print_dependencies(d.dependencies, inner_level=inner_level + 1)
-
-
