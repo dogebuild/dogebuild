@@ -1,10 +1,11 @@
 import argparse
 import logging
 import logging.config
-import pkg_resources
 import sys
-from pathlib import Path
 from encodings import utf_8
+from pathlib import Path
+
+import pkg_resources
 
 from dogebuild.common import DOGE_FILE
 from dogebuild.doge import DogeFile, DogeFileFactory

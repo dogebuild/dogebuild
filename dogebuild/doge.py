@@ -1,6 +1,6 @@
 import logging
-from pathlib import Path
 from os.path import relpath
+from pathlib import Path
 from typing import Dict, List
 
 from dogebuild.common import DOGE_FILE, DirectoryContext, sanitize_name

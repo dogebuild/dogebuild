@@ -5,8 +5,8 @@ from shutil import rmtree
 from subprocess import check_call
 from typing import Optional, Tuple
 
-from dogebuild.dogefile_internals.context import ContextHolder
 from dogebuild.common import DOGE_FILE, DOGE_MODULES_DIRECTORY
+from dogebuild.dogefile_internals.context import ContextHolder
 
 
 class Dependency:

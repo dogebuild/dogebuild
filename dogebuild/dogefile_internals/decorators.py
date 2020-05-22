@@ -1,8 +1,6 @@
 from typing import Callable, List
 
-from dogebuild.common import sanitize_name
 from dogebuild.dogefile_internals.context import ContextHolder
-from dogebuild.dogefile_internals.relations import TaskRelationManager
 
 DOGEFILE_TASK_PREFIX = "dogefile:"
 

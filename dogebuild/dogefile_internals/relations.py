@@ -1,11 +1,9 @@
 from collections import OrderedDict
 from dataclasses import dataclass
 from inspect import signature
-from typing import Callable, Dict, List, Tuple, Optional
+from typing import Callable, Dict, List, Optional
 
 from toposort import toposort_flatten
-
-from dogebuild.dogefile_internals.errors import DogeFileConfigurationError
 
 
 class RelationManager:
@@ -90,7 +88,7 @@ class PhaseTask(Task):
 
 
 class PluginTask(Task):
-    def __init__(self, canonical_name: str, method: Callable, plugin_instance: "DogePlugin"):
+    def __init__(self, canonical_name: str, method: Callable, plugin_instance):
         super(PluginTask, self).__init__(canonical_name)
         self.method = method
         self.plugin_instance = plugin_instance
@@ -156,7 +154,7 @@ class TaskRelationManager:
         plugin_name: str = None,
         dependencies: List[str] = None,
         phase: str = None,
-        plugin_instance: "DogePlugin" = None,
+        plugin_instance=None,
     ):
         if aliases is None:
             aliases = []
