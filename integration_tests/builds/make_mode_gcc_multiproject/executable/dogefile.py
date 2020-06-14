@@ -2,11 +2,11 @@ from pathlib import Path
 from shutil import rmtree
 from subprocess import run
 
-from dogebuild import dependencies, folder, make_mode, task
+from dogebuild import dependencies, directory, dogedep, make_mode, task
 
 make_mode()
 
-dependencies(folder("../library"))
+dependencies(dogedep(directory("../library")))
 
 src_dir = Path("./src")
 sources = src_dir.glob("**/*.cpp")

@@ -2,7 +2,7 @@ from pathlib import Path
 from shutil import copy, rmtree
 from subprocess import run
 
-from dogebuild import make_mode, task
+from dogebuild import make_mode, publish_artifacts, task
 
 make_mode()
 
@@ -43,4 +43,7 @@ def build():
         rel = header.relative_to(src_dir)
         copy(str(header), str(headers_dir / rel))
 
-    return 0, {"libraries": [target,], "headers": [headers_dir,],}
+    return 0, {"libraries": [target.resolve()], "headers": [headers_dir.resolve()],}
+
+
+publish_artifacts("libraries", "headers")

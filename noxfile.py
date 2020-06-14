@@ -1,6 +1,6 @@
-import nox
 from pathlib import Path
-from itertools import chain
+
+import nox
 
 
 LINE_LENGTH = 120
@@ -40,9 +40,10 @@ def integration_tests(session, build_dir):
 def style(session):
     session.install("flake8", "black", "isort")
 
-    source_files = map(str, chain.from_iterable(map(lambda p: Path(p).glob("**/*.py"), STYLE_TARGETS)))
+    session.run("black", "--version")
+    session.run("black", "--check", "--target-version", "py38", "--line-length", f"{LINE_LENGTH}", *STYLE_TARGETS)
 
-    session.run("black", "--target-version", "py38", "--line-length", f"{LINE_LENGTH}", "--check", *STYLE_TARGETS)
+    session.run("flake8", "--version")
     session.run(
         "flake8",
         "--max-line-length",
@@ -52,16 +53,22 @@ def style(session):
         "--show-source",
         *STYLE_TARGETS,
     )
-    session.run(
-        "isort",
-        "--multi-line",
-        "3",
-        "--trailing-comma",
-        "--force-grid-wrap",
-        "0",
-        "--use-parentheses",
-        "--line-width",
-        f"{LINE_LENGTH}",
-        "--check-only",
-        *source_files,
-    )
+
+    # Isort is broken for virtualenvs. IDK hpw to fix it now
+    # source_files = map(str, chain.from_iterable(map(lambda p: Path(p).glob("**/*.py"), STYLE_TARGETS)))
+    # session.run("isort", "--version")
+    # session.run(
+    #     "isort",
+    #     "--check-only",
+    #     "--project",
+    #     "dogebuild",
+    #     "--multi-line",
+    #     "3",
+    #     "--trailing-comma",
+    #     "--force-grid-wrap",
+    #     "0",
+    #     "--use-parentheses",
+    #     "--line-width",
+    #     f"{LINE_LENGTH}",
+    #     *source_files,
+    # )

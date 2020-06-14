@@ -1,4 +1,5 @@
 import logging
+from functools import reduce
 from os.path import relpath
 from pathlib import Path
 from typing import Dict, List
@@ -6,7 +7,7 @@ from typing import Dict, List
 from dogebuild.common import DOGE_FILE, DirectoryContext, sanitize_name
 from dogebuild.dependencies_functions import resolve_dependency_tree
 from dogebuild.dogefile_internals.context import Context, ContextHolderGuard
-from dogebuild.dogefile_internals.dependencies import Dependency
+from dogebuild.dogefile_internals.dependencies import Dependency, DogeDependency
 
 
 class DogeFileLoggerAdapter(logging.LoggerAdapter):
@@ -43,6 +44,9 @@ class DogeFile:
         self.test_dependencies = context.test_dependencies
         self.relman = context.relman
         self.artifacts = {}
+        self.artifacts_to_publish = context.artifacts_to_publish + reduce(
+            lambda acc, plugin: acc + plugin.artifacts_to_publish, context.plugins, []
+        )
         self.code_context = context.code_context
         self.modules = context.modules
 
@@ -71,8 +75,10 @@ class DogeFile:
                     self.logger.exception(
                         f"{current_task.TASK_TYPE} {current_task.canonical_name} failed", exc_info=result.error
                     )
+                    exit(1)
                 elif result.exit_code != 0:
                     self.logger.error(f"{current_task.TASK_TYPE} {current_task.canonical_name} failed")
+                    exit(result.exit_code)
                 else:
                     self._add_artifacts(result.artifacts)
                     self.logger.debug(f"{current_task.TASK_TYPE} {current_task.canonical_name} successfully terminated")
@@ -84,17 +90,12 @@ class DogeFile:
             self.logger.info(f"Resolving dependency {dependency}")
             dependency.acquire_dependency()
 
-            dependency_doge_file = dependency.get_doge_file()
-            if dependency_doge_file:
-                dependency_doge_file = self.factory.create(dependency_doge_file)
-                dependency_doge_file.run_tasks(["build"])
-
-                absolute_artifacts = {}
-                dff = Path(dependency_doge_file.directory).resolve()
-                for k, v in dependency_doge_file.artifacts.items():
-                    absolute_artifacts[k] = list(map(lambda d: dff / d, v))
-
-                self._add_artifacts(absolute_artifacts)
+            if isinstance(dependency, DogeDependency):
+                dependency_doge_file = self.factory.create(dependency.get_doge_file_path())
+                dependency_doge_file.run_tasks(dependency.tasks)
+                self._add_artifacts(dependency_doge_file._get_published_artifacts())
+            else:
+                self._add_artifacts(dependency.get_artifacts())
 
     def _add_artifacts(self, add: Dict[str, List]) -> None:
         for type, artifacts in add.items():
@@ -102,6 +103,9 @@ class DogeFile:
                 self.artifacts[type] += artifacts
             else:
                 self.artifacts[type] = artifacts
+
+    def _get_published_artifacts(self) -> Dict[str, List[Path]]:
+        return {k: v for k, v in self.artifacts.items() if k in self.artifacts_to_publish}
 
     @staticmethod
     def _load_doge_file(doge_file: Path, doge_file_id: str) -> Context:

@@ -25,7 +25,7 @@ setup(
     scripts=["scripts/doge_runner.py",],
     entry_points={"console_scripts": ["doge = doge_runner:main",],},
     test_suite="tests",
-    install_requires=["pip", "virtualenv", "toposort==1.5", "colorlog==4.0.2",],
+    install_requires=["pip", "virtualenv", "toposort==1.5", "colorlog==4.0.2", "gitsnapshot==0.1.2",],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",

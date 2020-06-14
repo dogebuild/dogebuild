@@ -14,6 +14,7 @@ class Context:
         self.test_dependencies = []
         self.code_context = None
         self.modules = []
+        self.artifacts_to_publish = []
 
     def verify(self):
         self.relman.verify()
