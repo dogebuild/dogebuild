@@ -8,7 +8,7 @@ from pathlib import Path
 import pkg_resources
 
 from dogebuild.common import DOGE_FILE
-from dogebuild.doge import DogeFile, DogeFileFactory
+from dogebuild.dogefile import DogeFile, DogeFileFactory
 
 
 def _load_version():

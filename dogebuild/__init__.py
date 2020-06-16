@@ -3,7 +3,7 @@ from dogebuild.dogefile_internals.decorators import task  # noqa: F401
 from dogebuild.dogefile_internals.dependencies import (  # noqa: F401
     dependencies,
     directory,
-    dogedep,
+    doge,
     git,
     publish_artifacts,
     test_dependencies,

@@ -117,7 +117,7 @@ def git(repo: str, version: str = "branch:master", **kwargs) -> GitDependency:
     return GitDependency(repo, version)
 
 
-def dogedep(dependency: Dependency, tasks: List[str] = None) -> DogeDependency:
+def doge(dependency: Dependency, tasks: List[str] = None) -> DogeDependency:
     return DogeDependency(dependency, tasks)
 
 
