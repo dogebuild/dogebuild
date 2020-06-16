@@ -34,7 +34,7 @@ You must enumerate all the phases as keys o this dictionary and values are lists
 
 
 ```python
-from dogebuild.context import lifecycle
+from dogebuild.dogefile_internals.context import lifecycle
 
 
 lifecycle({

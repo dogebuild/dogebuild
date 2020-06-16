@@ -2,9 +2,9 @@ import logging
 from os import path
 from typing import List, Optional
 
+from dogebuild.dogefile_internals.dependencies import Dependency
+
 from .common import DOGE_FILE
-from .dependencies import Dependency
-from .dogefile_loader import load_doge_file
 
 
 def resolve_dependency_tree(dependencies: List[Dependency], parents: List[str] = None) -> List[Dependency]:
@@ -14,14 +14,14 @@ def resolve_dependency_tree(dependencies: List[Dependency], parents: List[str] =
     for d in dependencies:
         id, version = d.get_id()
         if id in parents:
-            raise Exception('Circular dependency')
+            raise Exception("Circular dependency")
         use_version = _resolve_version_(id, version)
         if version != use_version:
             d.original_version = d.version
             d.version = use_version
-        logging.info('Acquiring {} ...'.format(d))
+        logging.info("Acquiring {} ...".format(d))
         d.acquire_dependency()
-        deps, _ = load_doge_file(path.join(d.get_doge_file_folder(), DOGE_FILE))
+        deps, _ = load_doge_file(path.join(d.get_doge_file_folder(), DOGE_FILE))  # noqa
         d.dependencies = resolve_dependency_tree(deps, parents + [id])
     return dependencies
 

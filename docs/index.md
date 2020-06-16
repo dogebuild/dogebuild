@@ -49,17 +49,17 @@ doge build
 To add dependency to folder use `folder` function from `dogebuild.dependencies`
 
 ```python
-from dogebuild.dependencies import dependencies, folder
+from dogebuild.dogefile_internals.dependencies import dependencies, directory
 
 dependencies(
-    folder('../module')
+    directory('../module')
 )
 ```
 
 To add dependency to external git repository use `git` function from `dogebuild.dependencies`
 
 ```python
-from dogebuild.dependencies import dependencies, git
+from dogebuild.dogefile_internals.dependencies import dependencies, git
 
 dependencies(
     git('git@github.com:dogebuild/test.git')

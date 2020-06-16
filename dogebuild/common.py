@@ -1,10 +1,11 @@
-from typing import List, Dict
-import os
 import glob
+import os
 from itertools import chain
+from pathlib import Path
+from typing import Dict, List, Union
 
-
-DOGE_FILE = 'dogefile.py'
+DOGE_FILE = "dogefile.py"
+DOGE_MODULES_DIRECTORY = ".doge_modules"
 
 
 def files(base_dir: str, include: List[str], exclude: List[str] = None):
@@ -14,11 +15,13 @@ def files(base_dir: str, include: List[str], exclude: List[str] = None):
     def expand_glob(base_dir, g):
         return glob.iglob(os.path.join(base_dir, g), recursive=True)
 
-    return set(chain.from_iterable(map(lambda p: expand_glob(base_dir, p), include))) - set(chain.from_iterable(map(lambda p: expand_glob(base_dir, p), exclude)))
+    return set(chain.from_iterable(map(lambda p: expand_glob(base_dir, p), include))) - set(
+        chain.from_iterable(map(lambda p: expand_glob(base_dir, p), exclude))
+    )
 
 
 def sanitize_name(name: str):
-    return name.replace('_', '-')
+    return name.replace("_", "-")
 
 
 def merge_dicts(*dicts: Dict[str, List]):
@@ -31,18 +34,17 @@ def merge_dicts(*dicts: Dict[str, List]):
     return result
 
 
-class GlobalsContext:
-    def __init__(self, context: Dict):
-        self.context = context
-        self.saved = {}
+class DirectoryContext:
+    def __init__(self, directory: Union[Path, str]):
+        if isinstance(directory, str):
+            directory = Path(directory)
+        directory = directory.resolve()
+        self.directory = directory
+        self.saved = None
 
     def __enter__(self):
-        self.saved = globals()
-        globals().clear()
-        for k, v in self.context.items():
-            globals()[k] = v
+        self.saved = os.getcwd()
+        os.chdir(self.directory)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        globals().clear()
-        for k, v in self.saved.items():
-            globals()[k] = v
+        os.chdir(self.saved)

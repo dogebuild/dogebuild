@@ -19,23 +19,47 @@ Dogebuild uses `dogefile.py` to describe project structure and task DAG.
 An example of `dogefile.py`:
 
 ```python
-from dogebuild_c.c_plugin import CPlugin, BinaryType
-from dogebuild.dependencies import dependencies, folder
+from dogebuild import make_mode, task
 
-dependencies(
-    folder('../dependency')
-)
+make_mode()
 
-CPlugin(
-    type=BinaryType.EXECUTABLE,
-    out='hello',
-    src_dir='.',
-    src=[
-        'main.c',
-    ],
+
+@task
+def task1():
+    print("task1")
+
+
+@task()
+def task2():
+    print("task2")
+
+
+@task(
+    aliases=["Task 3 verbose name"], depends=["task1", "task2"],
 )
+def task3():
+    print("task3")
+
+
+@task(depends=["Task 3 verbose name"], aliases=["build"])
+def task4():
+    print("task4")
+
 ```
 
 To run task simply pass task name as argument to doge script.
 `doge build` will run `build` task and all dependencies.
-You can also run multiple tasks: `doge clean build`.
+You can also run multiple tasks: `doge task1 task2`.
+
+For more advanced use see plugins section.
+
+## Plugins
+
+Plugins allow to hide low-level mechanics of build from user. 
+See how to use plugins in plugin documentation.
+
+### Language plugins:
+
+#### C/C++
+
+- [dogebuild-c](https://github.com/dogebuild/dogebuild-c) - a C/C++ build plugin

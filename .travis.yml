@@ -2,12 +2,14 @@ language: python
 dist: xenial
 sudo: true
 python:
-- '3.6'
 - '3.7'
+- "3.8"
 install:
 - python setup.py install
+before_script:
+- pip install nox
 script:
-- python setup.py test
+- nox
 stages:
 - test
 - name: deploy

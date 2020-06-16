@@ -1,38 +1,38 @@
 from logging import getLogger
 from typing import Callable, List
 
-from dogebuild.context import ContextHolder
+from dogebuild.dogefile_internals.context import ContextHolder
 
 
 class DogePlugin:
-    NAME = 'This is abstract doge plugin so this variable should never be used'
+    NAME = "This is abstract doge plugin so this variable should never be used"
 
     @classmethod
     def get_name(cls):
         return cls.NAME
 
-    def __init__(self, **kwargs):
+    def __init__(self, artifacts_to_publish: List[str] = None):
+        if artifacts_to_publish is None:
+            artifacts_to_publish = []
+
         self.logger = getLogger(self.get_name())
 
-        ContextHolder.CONTEXT.plugins.append(self)
+        ContextHolder.INSTANCE.context.plugins.append(self)
 
-        self.relman = ContextHolder.CONTEXT.relman
-        self.dependencies = ContextHolder.CONTEXT.dependencies
-        self.test_dependencies = ContextHolder.CONTEXT.test_dependencies
+        self.relman = ContextHolder.INSTANCE.context.relman
+        self.dependencies = ContextHolder.INSTANCE.context.dependencies
+        self.test_dependencies = ContextHolder.INSTANCE.context.test_dependencies
 
-    def add_task(self, task_name: str, task: Callable, phase: str = None):
-        task_name = self._resolve_full_task_name(task_name)
+        self.artifacts_to_publish = artifacts_to_publish
 
-        self.relman.add_task(task_name, task)
-        if phase:
-            self.relman.add_dependency(phase, [task_name])
-            self.relman.add_dependency(task_name, self.relman.get_dependencies(phase))
-
-    def add_dependency(self, task_name: str, dependencies: List[str]):
-        task_name = self._resolve_full_task_name(task_name)
-        dependencies = list(map(lambda n: self._resolve_full_task_name(n), dependencies))
-
-        self.relman.add_dependency(task_name, dependencies)
-
-    def _resolve_full_task_name(self, task_name: str):
-        return self.__class__.get_name() + ":" + task_name
+    def add_task(
+        self, task_callable: Callable, *, aliases: List[str] = None, depends: List[str] = None, phase: str = None
+    ):
+        self.relman.add_task(
+            task_callable,
+            aliases=aliases,
+            dependencies=depends,
+            plugin_name=self.NAME,
+            phase=phase,
+            plugin_instance=self,
+        )
