@@ -183,6 +183,7 @@ class TaskRelationManager:
         self._relation_manager.add_dependency(canonical_task_name, dependencies)
         if phase:
             self._relation_manager.add_dependency(phase, [canonical_task_name])
+            self._relation_manager.add_dependency(canonical_task_name, self._phases.get(phase))
 
     def add_dependency(self, canonical_task_name: str, dependencies: List[str]):
         self._relation_manager.add_dependency(canonical_task_name, dependencies)
