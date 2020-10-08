@@ -1,4 +1,5 @@
 import logging
+import sys
 from functools import reduce
 from os.path import relpath
 from pathlib import Path
@@ -111,7 +112,9 @@ class DogeFile:
     def _load_doge_file(doge_file: Path, doge_file_id: str) -> Context:
         with open(doge_file, "r") as file, ContextHolderGuard(doge_file, doge_file_id) as holder:
             code = compile(file.read(), doge_file.name, "exec")
+            sys.path = [str(doge_file.parent)] + sys.path
             exec(code, holder.globals_context)
+            sys.path = sys.path[1:]
             holder.context.verify()
             return holder.context
 

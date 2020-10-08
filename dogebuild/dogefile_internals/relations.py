@@ -1,9 +1,11 @@
 from collections import OrderedDict
 from dataclasses import dataclass
 from inspect import signature
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Iterable
 
 from toposort import toposort_flatten
+
+from dogebuild.common import sanitize_name
 
 
 class RelationManager:
@@ -12,7 +14,7 @@ class RelationManager:
     def __init__(self):
         self._edges = {}
 
-    def add_dependency(self, dependant, dependencies: List):
+    def add_dependency(self, dependant, dependencies: Iterable):
         if dependant not in self._edges:
             self._edges[dependant] = set()
 
@@ -180,7 +182,7 @@ class TaskRelationManager:
                 else:
                     self._tasks_aliases[alias] = DuplicateAlias([self._tasks_aliases[alias], alias])
 
-        self._relation_manager.add_dependency(canonical_task_name, dependencies)
+        self._relation_manager.add_dependency(canonical_task_name, map(sanitize_name, dependencies))
         if phase:
             self._relation_manager.add_dependency(phase, [canonical_task_name])
             self._relation_manager.add_dependency(canonical_task_name, self._phases.get(phase))
@@ -227,13 +229,16 @@ class TaskRelationManager:
         result = []
         for short_name in short_names:
             if plugin_name is None:
-                result.extend(
-                    [f"{self._doge_file_id}:{short_name}", short_name,]
-                )
+                result.extend([
+                    sanitize_name(f"{self._doge_file_id}:{short_name}"),
+                    sanitize_name(short_name),
+                ])
             else:
-                result.extend(
-                    [f"{self._doge_file_id}:{plugin_name}:{short_name}", f"{plugin_name}:{short_name}", short_name,]
-                )
+                result.extend([
+                    sanitize_name(f"{self._doge_file_id}:{plugin_name}:{short_name}"),
+                    sanitize_name(f"{plugin_name}:{short_name}"),
+                    sanitize_name(short_name),
+                ])
         return result
 
 
