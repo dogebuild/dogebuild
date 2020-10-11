@@ -20,12 +20,33 @@ setup(
     author="Kirill Sulim",
     author_email="kirillsulim@gmail.com",
     license="MIT",
-    packages=find_packages(include=["dogebuild", "dogebuild.*",]),
-    package_data={"dogebuild": ["dogebuild.version",]},
-    scripts=["scripts/doge_runner.py",],
-    entry_points={"console_scripts": ["doge = doge_runner:main",],},
+    packages=find_packages(
+        include=[
+            "dogebuild",
+            "dogebuild.*",
+        ]
+    ),
+    package_data={
+        "dogebuild": [
+            "dogebuild.version",
+        ]
+    },
+    scripts=[
+        "scripts/doge_runner.py",
+    ],
+    entry_points={
+        "console_scripts": [
+            "doge = doge_runner:main",
+        ],
+    },
     test_suite="tests",
-    install_requires=["pip", "virtualenv", "toposort==1.5", "colorlog==4.0.2", "gitsnapshot==0.1.2",],
+    install_requires=[
+        "pip",
+        "virtualenv",
+        "toposort==1.5",
+        "colorlog==4.0.2",
+        "gitsnapshot==0.1.2",
+    ],
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Environment :: Console",

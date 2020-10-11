@@ -9,3 +9,4 @@ from dogebuild.dogefile_internals.dependencies import (  # noqa: F401
     test_dependencies,
 )
 from dogebuild.dogefile_internals.modules import modules  # noqa: F401
+from dogebuild.dogefile_internals.parameters import add_parameter  # noqa: F401

@@ -27,5 +27,12 @@ def clean():
 @task(depends=["make_build_dir"])
 def build():
     run(
-        ["g++", "-o", str(target), *map(str, sources), f"-I{headers}",], check=True,
+        [
+            "g++",
+            "-o",
+            str(target),
+            *map(str, sources),
+            f"-I{headers}",
+        ],
+        check=True,
     )

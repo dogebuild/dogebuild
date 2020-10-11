@@ -1,9 +1,11 @@
 from collections import OrderedDict
 from dataclasses import dataclass
 from inspect import signature
-from typing import Callable, Dict, List, Optional
+from typing import Callable, Dict, List, Optional, Iterable, Any
 
 from toposort import toposort_flatten
+
+from dogebuild.common import sanitize_name
 
 
 class RelationManager:
@@ -12,7 +14,7 @@ class RelationManager:
     def __init__(self):
         self._edges = {}
 
-    def add_dependency(self, dependant, dependencies: List):
+    def add_dependency(self, dependant, dependencies: Iterable):
         if dependant not in self._edges:
             self._edges[dependant] = set()
 
@@ -55,7 +57,7 @@ class Task:
     def __init__(self, canonical_name: str):
         self.canonical_name = canonical_name
 
-    def run(self, artifacts: Dict, code_context: Dict) -> TaskResult:
+    def run(self, artifacts: Dict, parameters: Dict[str, Any], code_context: Dict) -> TaskResult:
         raise NotImplementedError()
 
 
@@ -64,12 +66,25 @@ class FunctionTask(Task):
         super(FunctionTask, self).__init__(canonical_name)
         self.function = function
 
-    def run(self, artifacts: Dict, code_context: Dict):
+    def run(self, artifacts: Dict, parameters: Dict[str, Any], code_context: Dict):
         try:
             sig = signature(self.function)
             locals_values = {}
             for arg in sig.parameters:
-                locals_values[arg] = artifacts.get(arg, [])
+                if arg.startswith("parameter_"):
+                    param_name = arg[len("parameter_") :]
+                    if param_name in parameters:
+                        locals_values[arg] = parameters[param_name]
+                    else:
+                        raise Exception(f"Parameter {param_name} not described in dogefile")
+                elif arg.startswith("artifact_"):
+                    artifact_name = arg[len("artifact_") :]
+                    if artifact_name in artifacts:
+                        locals_values[arg] = artifacts[artifact_name]
+                    else:
+                        raise Exception(f"Artifact {artifact_name} not found")
+                else:
+                    locals_values[arg] = parameters.get(arg, artifacts.get(arg, []))
             callable_name = self.function.__name__
             exec(f'RESULT = {callable_name}({", ".join(locals_values.keys())})', code_context, locals_values)
             res = locals_values.get("RESULT")
@@ -83,7 +98,7 @@ class FunctionTask(Task):
 class PhaseTask(Task):
     TASK_TYPE = "Phase"
 
-    def run(self, artifacts: Dict, code_context: Dict) -> TaskResult:
+    def run(self, artifacts: Dict, parameters: Dict[str, Any], code_context: Dict) -> TaskResult:
         return TaskResult(0, {}, None)
 
 
@@ -93,7 +108,7 @@ class PluginTask(Task):
         self.method = method
         self.plugin_instance = plugin_instance
 
-    def run(self, artifacts: Dict, code_context: Dict):
+    def run(self, artifacts: Dict, parameters: Dict[str, Any], code_context: Dict):
         try:
             sig = signature(self.method)
             locals_values = {"PLUGIN_INSTANCE": self.plugin_instance}
@@ -180,7 +195,7 @@ class TaskRelationManager:
                 else:
                     self._tasks_aliases[alias] = DuplicateAlias([self._tasks_aliases[alias], alias])
 
-        self._relation_manager.add_dependency(canonical_task_name, dependencies)
+        self._relation_manager.add_dependency(canonical_task_name, map(sanitize_name, dependencies))
         if phase:
             self._relation_manager.add_dependency(phase, [canonical_task_name])
             self._relation_manager.add_dependency(canonical_task_name, self._phases.get(phase))
@@ -228,11 +243,18 @@ class TaskRelationManager:
         for short_name in short_names:
             if plugin_name is None:
                 result.extend(
-                    [f"{self._doge_file_id}:{short_name}", short_name,]
+                    [
+                        sanitize_name(f"{self._doge_file_id}:{short_name}"),
+                        sanitize_name(short_name),
+                    ]
                 )
             else:
                 result.extend(
-                    [f"{self._doge_file_id}:{plugin_name}:{short_name}", f"{plugin_name}:{short_name}", short_name,]
+                    [
+                        sanitize_name(f"{self._doge_file_id}:{plugin_name}:{short_name}"),
+                        sanitize_name(f"{plugin_name}:{short_name}"),
+                        sanitize_name(short_name),
+                    ]
                 )
         return result
 

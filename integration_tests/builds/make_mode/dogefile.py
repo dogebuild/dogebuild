@@ -14,7 +14,8 @@ def task2():
 
 
 @task(
-    aliases=["Task 3 verbose name"], depends=["task1", "task2"],
+    aliases=["Task 3 verbose name"],
+    depends=["task1", "task2"],
 )
 def task3():
     print("task3")
