@@ -6,7 +6,11 @@ DOGEFILE_TASK_PREFIX = "dogefile:"
 
 
 def task(
-    task_callable: Callable = None, *, aliases: List[str] = None, depends: List[str] = None, phase: str = None,
+    task_callable: Callable = None,
+    *,
+    aliases: List[str] = None,
+    depends: List[str] = None,
+    phase: str = None,
 ):
     if task_callable is None:
         return lambda func: task(func, aliases=aliases, depends=depends, phase=phase)

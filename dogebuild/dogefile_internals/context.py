@@ -15,6 +15,7 @@ class Context:
         self.code_context = None
         self.modules = []
         self.artifacts_to_publish = []
+        self.parameters = []
 
     def verify(self):
         self.relman.verify()

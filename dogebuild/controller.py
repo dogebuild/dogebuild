@@ -24,25 +24,33 @@ class DogeController:
     def __init__(self, args):
         self.args = self._parse_args(args)
         self._config_logging()
-        self.doge = DogeFileFactory(Path()).create(self.args.file)
 
     def run(self) -> int:
-        return self.args.command(self.doge, self.args.options)
+        self.doge = DogeFileFactory(Path()).create(self.args.file)
+        if self.args.doge_task:
+            params = self.doge.extract_parameters(self.args.parameters)
+            tasks = params.tasks
+            tasks_params = {**params.__dict__}
+            tasks_params.pop("tasks")
+            return self.doge.run_tasks(tasks, tasks_params)
+        else:
+            return self.args.command(self.doge, self.args.options)
 
     @staticmethod
     def _parse_args(args) -> argparse.Namespace:
         main_parser = argparse.ArgumentParser(prog="doge", description="")
         main_parser.add_argument("--version", "-V", action="version", version=_load_version())
         main_parser.add_argument("--file", "-f", default=DOGE_FILE, type=Path)
-        main_parser.add_argument("command", nargs=1)
-        main_parser.add_argument("options", nargs=argparse.REMAINDER)
+        main_parser.add_argument("parameters", nargs=argparse.REMAINDER)
 
         main_args = main_parser.parse_args(args)
 
-        if main_args.command[0] in DogeController.COMMAND_MAP.keys():
-            main_args.command = DogeController.COMMAND_MAP[main_args.command[0]]
+        if main_args.parameters[0] in DogeController.COMMAND_MAP.keys():
+            main_args.doge_task = False
+            main_args.command = DogeController.COMMAND_MAP[main_args.parameters[0]]
+            main_args.parameters = main_args.parameters[1:]
         else:
-            main_args.options = main_args.command + main_args.options
+            main_args.doge_task = True
             main_args.command = DogeFile.run_tasks
 
         return main_args
@@ -56,7 +64,11 @@ class DogeController:
             {
                 "version": 1,
                 "formatters": {
-                    "colored": {"()": "colorlog.ColoredFormatter", "format": console_format, "style": "{",},
+                    "colored": {
+                        "()": "colorlog.ColoredFormatter",
+                        "format": console_format,
+                        "style": "{",
+                    },
                 },
                 "handlers": {
                     "console": {
@@ -66,6 +78,11 @@ class DogeController:
                         "stream": sys.stdout,
                     },
                 },
-                "loggers": {"": {"handlers": ["console"], "level": console_level,},},
+                "loggers": {
+                    "": {
+                        "handlers": ["console"],
+                        "level": console_level,
+                    },
+                },
             }
         )

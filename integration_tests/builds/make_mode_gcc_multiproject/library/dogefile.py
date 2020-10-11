@@ -28,13 +28,26 @@ def clean():
 def build():
     for src in sources:
         run(
-            ["g++", "-c", "-fPIC", "-o", str((build_dir / src.name).with_suffix(".o")), str(src), f"-I{headers}",],
+            [
+                "g++",
+                "-c",
+                "-fPIC",
+                "-o",
+                str((build_dir / src.name).with_suffix(".o")),
+                str(src),
+                f"-I{headers}",
+            ],
             check=True,
         )
 
     object_files = build_dir.glob("**/*.o")
     run(
-        ["ar", "rcs", str(target), *map(str, object_files),]
+        [
+            "ar",
+            "rcs",
+            str(target),
+            *map(str, object_files),
+        ]
     )
 
     headers_dir = build_dir / "headers"
@@ -43,7 +56,10 @@ def build():
         rel = header.relative_to(src_dir)
         copy(str(header), str(headers_dir / rel))
 
-    return 0, {"libraries": [target.resolve()], "headers": [headers_dir.resolve()],}
+    return 0, {
+        "libraries": [target.resolve()],
+        "headers": [headers_dir.resolve()],
+    }
 
 
 publish_artifacts("libraries", "headers")

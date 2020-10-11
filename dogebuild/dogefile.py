@@ -3,7 +3,8 @@ import sys
 from functools import reduce
 from os.path import relpath
 from pathlib import Path
-from typing import Dict, List
+from typing import Dict, List, Any
+from argparse import ArgumentParser
 
 from dogebuild.common import DOGE_FILE, DirectoryContext, sanitize_name
 from dogebuild.dependencies_functions import resolve_dependency_tree
@@ -50,19 +51,28 @@ class DogeFile:
         )
         self.code_context = context.code_context
         self.modules = context.modules
+        self.parameters = context.parameters
 
         self.processed_tasks = {}
 
         self.logger = DogeFileLoggerAdapter(logging.getLogger(), self.doge_file_id)
         self.factory = factory
 
-    def run_tasks(self, tasks: List[str]):
+    def extract_parameters(self, options: List[str]):
+        parser = ArgumentParser()
+        for param in self.parameters:
+            parser.add_argument(f"--{param.name}", type=param.parser, default=param.default)
+        parser.add_argument("tasks", nargs="*")
+
+        return parser.parse_intermixed_args(options)
+
+    def run_tasks(self, tasks: List[str], parameters: Dict[str, Any]):
         for submodule in self.modules:
             submodule_doge_file = self.factory.create(self.directory / submodule / DOGE_FILE)
-            submodule_doge_file.run_tasks(tasks)
+            submodule_doge_file.run_tasks(tasks, parameters)
 
         with DirectoryContext(self.directory):
-            self._resolve_dependencies()
+            self._resolve_dependencies(parameters)
 
             run_list = self.relman.get_tasks(map(sanitize_name, tasks))
             self.logger.info("Run tasks: {}".format(", ".join(map(lambda task: task.canonical_name, run_list))))
@@ -71,7 +81,7 @@ class DogeFile:
                 if current_task.canonical_name in self.processed_tasks:
                     continue
 
-                result = current_task.run(self.artifacts, self.code_context)
+                result = current_task.run(self.artifacts, parameters, self.code_context)
                 if result.error is not None:
                     self.logger.exception(
                         f"{current_task.TASK_TYPE} {current_task.canonical_name} failed", exc_info=result.error
@@ -86,14 +96,14 @@ class DogeFile:
 
                 self.processed_tasks[current_task.canonical_name] = result
 
-    def _resolve_dependencies(self):
+    def _resolve_dependencies(self, parameters: Dict[str, Any]):
         for dependency in self.dependencies + self.test_dependencies:
             self.logger.info(f"Resolving dependency {dependency}")
             dependency.acquire_dependency()
 
             if isinstance(dependency, DogeDependency):
                 dependency_doge_file = self.factory.create(dependency.get_doge_file_path())
-                dependency_doge_file.run_tasks(dependency.tasks)
+                dependency_doge_file.run_tasks(dependency.tasks, parameters)
                 self._add_artifacts(dependency_doge_file._get_published_artifacts())
             else:
                 self._add_artifacts(dependency.get_artifacts())
